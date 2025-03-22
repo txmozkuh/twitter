@@ -1,10 +1,15 @@
 import userService from '@/services/users.services'
-import { ResponseApiType } from '@/types/response.types'
+import { ApiResponse } from '@/types/auth.types'
+import WrappedError from '@/utils/error'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
-import { validationResult, matchedData, body, checkSchema } from 'express-validator'
+import { validationResult, checkSchema } from 'express-validator'
 
 export const loginValidator = (req: Request, res: Response, next: NextFunction) => {
   console.log('Validating Login...')
+  const { email, password } = req.body
+  if (!email || !password) {
+    return next(new WrappedError(400, 'Thiếu dữ liệu đăng nhập'))
+  }
   next()
 }
 
@@ -95,12 +100,12 @@ export const registerValidator = checkSchema({
 
 export const validateRequest: RequestHandler = (
   req: Request,
-  res: Response<ResponseApiType<Error>>,
+  res: Response<ApiResponse<Error>>,
   next: NextFunction
 ) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    res.status(400).json(errors.mapped())
+    res.status(400).json({ message: 'Lỗi', error: errors.array().toString() })
     return
   }
   next()

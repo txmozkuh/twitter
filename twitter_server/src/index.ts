@@ -1,6 +1,7 @@
 import express from 'express'
 import userRouter from '@routes/user.routes'
 import databaseService from '@/services/database.services'
+import { errorHandler } from '@/middlewares/errorHandler'
 
 databaseService
   .connect()
@@ -14,6 +15,8 @@ const PORT = process.env.PORT || 3000
 app.use(express.json())
 
 app.use('/users', userRouter)
+
+app.use(errorHandler)
 
 app.listen(PORT, () => {
   console.log(`⚙️  Server is running at port: ${PORT} \n ---------------------------------`)
