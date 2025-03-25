@@ -5,30 +5,37 @@ import { hashPassword } from '@/utils/crypto'
 import { ApiResponse, RegisterRequest } from '@/types/auth.types'
 import WrappedError from '@/utils/error'
 
-export const loginController = (req: Request, res: Response, next: NextFunction) => {
+export const loginController = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body
-
-  if (email === 'daeve.ph@gmail.com' && password === '123456') {
-    res.status(200).json({ message: 'Login success' })
-    return
+  try {
+    const user = await userService.login({ email, password: hashPassword(password) })
+    if (!user) {
+      return next(new WrappedError(401, 'Email hoặc mật khẩu không đúng'))
+    }
+    res.json({
+      success: true,
+      message: 'Đăng nhập thành công',
+      data: user
+    })
+  } catch (error) {
+    return next(error)
   }
-  next(new WrappedError(401, 'Không tìm thấy người dùng'))
-  return
 }
 
 export const registerController = async (
   req: Request<object, object, RegisterRequest>,
   res: Response<
     ApiResponse<{ name: string; email: string; date_of_birth: Date; access_token: string; refresh_token: string }>
-  >
+  >,
+  next: NextFunction
 ) => {
-  const { name, email, password, date_of_birth } = req.body
-  const hashedPassword = hashPassword(password)
-  const user = new User({ name, email, password: hashedPassword, date_of_birth })
-
   try {
+    const { name, email, password, date_of_birth } = req.body
+    const user = new User({ name, email, password, date_of_birth })
+
     const { access_token, refresh_token } = await userService.register(user as RegisterRequest)
     res.status(200).json({
+      success: true,
       message: 'Đăng ký người dùng thành công',
       data: {
         name,
@@ -40,10 +47,6 @@ export const registerController = async (
     })
     return
   } catch (error) {
-    res.status(400).json({
-      message: 'Đăng ký người dùng thất bại',
-      error: error instanceof Error ? error.message : (error as string)
-    })
-    return
+    return next(error)
   }
 }

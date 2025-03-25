@@ -4,59 +4,26 @@ import WrappedError from '@/utils/error'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
 import { validationResult, checkSchema } from 'express-validator'
 
-export const loginValidator = (req: Request, res: Response, next: NextFunction) => {
-  console.log('Validating Login...')
-  const { email, password } = req.body
-  if (!email || !password) {
-    return next(new WrappedError(400, 'Thiếu dữ liệu đăng nhập'))
-  }
-  next()
-}
-
-export const registerValidator = checkSchema({
-  name: {
-    in: ['body'],
-    escape: true,
-    trim: true,
-    isString: { errorMessage: 'Name must be a string' },
-    notEmpty: { errorMessage: 'Username is required' },
-    isLength: {
-      errorMessage: 'Username length must be between 3 and 20 characters',
-      options: { min: 3, max: 20 }
-    },
-    matches: {
-      options: /^[a-zA-Z0-9]+$/,
-      errorMessage: 'Username must only contain letters, numbers'
-    }
-  },
+export const loginValidator = checkSchema({
   email: {
     in: ['body'],
     escape: true,
     trim: true,
-    isString: { errorMessage: 'Email must be a string' },
-    notEmpty: { errorMessage: 'Email is required' },
+    isString: { errorMessage: 'Email phải là chuỗi kí tự' },
+    notEmpty: { errorMessage: 'Email không được để trống' },
     isLength: {
-      errorMessage: 'Email length must be between 3 and 50 characters',
+      errorMessage: 'Email phải có từ 3-20 kí tự',
       options: { min: 3, max: 50 }
     },
-    isEmail: { errorMessage: 'Invalid email format' },
-    custom: {
-      options: async (value) => {
-        const user = await userService.checkUserExist(value)
-        if (user) {
-          throw new Error('User already exists')
-        }
-        return false
-      }
-    }
+    isEmail: { errorMessage: 'Sai định dạng email' }
   },
   password: {
     in: ['body'],
     trim: true,
-    isString: { errorMessage: 'Password must be a string' },
-    notEmpty: { errorMessage: 'Password is required' },
+    isString: { errorMessage: 'Mật khẩu phải là chuỗi kí tự' },
+    notEmpty: { errorMessage: 'Yêu cầu nhập mật khẩu' },
     isLength: {
-      errorMessage: 'Password must be at least 6 characters long',
+      errorMessage: 'Mật khẩu phải có ít nhất 6 kí tự',
       options: { min: 6 }
     },
     isStrongPassword: {
@@ -67,19 +34,77 @@ export const registerValidator = checkSchema({
         minNumbers: 1,
         minSymbols: 1
       },
-      errorMessage:
-        'Password must be at least 6 characters long and contain at least one lowercase letter, one uppercase letter, one number, and one special character'
+      errorMessage: 'Mật khẩu cần có ít nhất một chữ cái thường, một chữ cái in hoa, 1 số và 1 ký tự đặc biệt'
+    }
+  }
+})
+
+export const registerValidator = checkSchema({
+  name: {
+    in: ['body'],
+    escape: true,
+    trim: true,
+    notEmpty: { errorMessage: 'Tên không được để trống' },
+    isString: { errorMessage: 'Tên phải là chuỗi kí tự' },
+    isLength: {
+      errorMessage: 'Username phải có từ 3-20 kí tự',
+      options: { min: 3, max: 20 }
+    },
+    matches: {
+      options: /^[a-zA-Z0-9]+$/,
+      errorMessage: 'Username chỉ được chứa chữ cái và số'
+    }
+  },
+  email: {
+    in: ['body'],
+    escape: true,
+    trim: true,
+    isString: { errorMessage: 'Email phải là chuỗi kí tự' },
+    notEmpty: { errorMessage: 'Email không được để trống' },
+    isLength: {
+      errorMessage: 'Email phải có từ 3-20 kí tự',
+      options: { min: 3, max: 50 }
+    },
+    isEmail: { errorMessage: 'Sai định dạng email' },
+    custom: {
+      options: async (value) => {
+        const user = await userService.checkUserExist(value)
+        if (user) {
+          throw new Error('Email đã tồn tại')
+        }
+        return true
+      }
+    }
+  },
+  password: {
+    in: ['body'],
+    trim: true,
+    isString: { errorMessage: 'Mật khẩu phải là chuỗi kí tự' },
+    notEmpty: { errorMessage: 'Yêu cầu nhập mật khẩu' },
+    isLength: {
+      errorMessage: 'Mật khẩu phải có ít nhất 6 kí tự',
+      options: { min: 6 }
+    },
+    isStrongPassword: {
+      options: {
+        minLength: 6,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1
+      },
+      errorMessage: 'Mật khẩu cần có ít nhất một chữ cái thường, một chữ cái in hoa, 1 số và 1 ký tự đặc biệt'
     }
   },
   confirm_password: {
     in: ['body'],
     trim: true,
-    isString: { errorMessage: 'Confirm password must be a string' },
-    notEmpty: { errorMessage: 'Confirm password is required' },
+    isString: { errorMessage: 'Mật khẩu xác nhận phải là chuỗi kí tự' },
+    notEmpty: { errorMessage: 'Yêu cầu xác nhận lại mật khẩu' },
     custom: {
       options: (value, { req }) => {
         if (value !== req.body.password) {
-          throw new Error('Password confirmation does not match password')
+          throw new Error('Mật khẩu xác nhận không khớp')
         }
         return true
       }
@@ -92,7 +117,7 @@ export const registerValidator = checkSchema({
         strict: true,
         strictSeparator: true
       },
-      errorMessage: 'Invalid date ISO8601 format'
+      errorMessage: 'Sai định dạng ngày'
     },
     toDate: true
   }
@@ -105,8 +130,7 @@ export const validateRequest: RequestHandler = (
 ) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    res.status(400).json({ message: 'Lỗi', error: errors.array().toString() })
-    return
+    return next(new WrappedError(422, errors.array()[0].msg))
   }
   next()
 }

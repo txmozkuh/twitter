@@ -2,6 +2,7 @@ import express from 'express'
 import userRouter from '@routes/user.routes'
 import databaseService from '@/services/database.services'
 import { errorHandler } from '@/middlewares/errorHandler'
+import 'express-async-errors'
 
 databaseService
   .connect()

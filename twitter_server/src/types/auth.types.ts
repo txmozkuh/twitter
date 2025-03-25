@@ -13,11 +13,12 @@ export interface LoginRequest {
 }
 
 export interface SuccessResponse<T> {
+  success: boolean
   message: string
   data: T
 }
 export interface ErrorResponse {
-  error: string
+  success: boolean
   message: string
 }
 
