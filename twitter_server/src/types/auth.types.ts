@@ -1,4 +1,5 @@
-import { Request } from 'express'
+import { TokenType } from '@/constants/enums'
+import { JwtPayload } from 'jsonwebtoken'
 
 export interface RegisterRequest {
   name: string
@@ -23,3 +24,8 @@ export interface ErrorResponse {
 }
 
 export type ApiResponse<T> = SuccessResponse<T> | ErrorResponse
+
+export interface AccessTokenPayload extends JwtPayload {
+  user_id: string
+  token_type: TokenType
+}

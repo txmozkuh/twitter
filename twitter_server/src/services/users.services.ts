@@ -6,6 +6,7 @@ import { RegisterRequest, LoginRequest } from '@/types/auth.types'
 import { hashPassword } from '@/utils/crypto'
 import WrappedError from '@/utils/error'
 import { signToken } from '@/utils/jwt'
+import { verify } from 'jsonwebtoken'
 import { ObjectId } from 'mongodb'
 class UserService {
   private signAccessToken(user_id: string) {
@@ -43,9 +44,19 @@ class UserService {
       refresh_token
     }
   }
+
+  verifyAccessToken(access_token: string) {
+    try {
+      const decode = verify(access_token, process.env.JWT_PRIVATE_KEY!)
+      return decode
+    } catch (error) {
+      throw new WrappedError(401, 'Token không hợp lệ')
+    }
+  }
+
   private async saveRefreshToken(refresh_token: string, user_id: ObjectId) {
     try {
-      const collection = await databaseService.getCollection('refresh_token')
+      const collection = await databaseService.getCollection('refresh_tokens')
       const existing_token = await collection.findOne({ user_id })
       if (existing_token) {
         collection.updateOne({ user_id }, { $set: { token: refresh_token } })
@@ -53,6 +64,7 @@ class UserService {
         collection.insertOne(new RefreshToken({ token: refresh_token, user_id }))
       }
     } catch (error) {
+      console.log(error)
       throw new WrappedError(500, 'Failed to store refresh token')
     }
   }
@@ -82,6 +94,19 @@ class UserService {
     }
     return false
   }
+
+  async logout(user_id: ObjectId) {
+    try {
+      await (
+        await databaseService.getCollection('refresh_tokens')
+      ).deleteOne({
+        user_id
+      })
+    } catch (error) {
+      throw new Error('Lỗi')
+    }
+  }
+
   async checkUserExist(email: string) {
     const user = await (
       await databaseService.getCollection('users')

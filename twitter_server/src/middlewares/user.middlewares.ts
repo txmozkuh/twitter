@@ -1,43 +1,50 @@
+import { TokenType } from '@/constants/enums'
+import databaseService from '@/services/database.services'
 import userService from '@/services/users.services'
-import { ApiResponse } from '@/types/auth.types'
+import { AccessTokenPayload, ApiResponse } from '@/types/auth.types'
 import WrappedError from '@/utils/error'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
-import { validationResult, checkSchema } from 'express-validator'
+import { validationResult, checkSchema, check } from 'express-validator'
+import { JwtPayload } from 'jsonwebtoken'
+import { ObjectId } from 'mongodb'
 
-export const loginValidator = checkSchema({
-  email: {
-    in: ['body'],
-    escape: true,
-    trim: true,
-    isString: { errorMessage: 'Email phải là chuỗi kí tự' },
-    notEmpty: { errorMessage: 'Email không được để trống' },
-    isLength: {
-      errorMessage: 'Email phải có từ 3-20 kí tự',
-      options: { min: 3, max: 50 }
-    },
-    isEmail: { errorMessage: 'Sai định dạng email' }
-  },
-  password: {
-    in: ['body'],
-    trim: true,
-    isString: { errorMessage: 'Mật khẩu phải là chuỗi kí tự' },
-    notEmpty: { errorMessage: 'Yêu cầu nhập mật khẩu' },
-    isLength: {
-      errorMessage: 'Mật khẩu phải có ít nhất 6 kí tự',
-      options: { min: 6 }
-    },
-    isStrongPassword: {
-      options: {
-        minLength: 6,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
-        minSymbols: 1
+export const loginValidator = checkSchema(
+  {
+    email: {
+      in: ['body'],
+      escape: true,
+      trim: true,
+      isString: { errorMessage: 'Email phải là chuỗi kí tự' },
+      notEmpty: { errorMessage: 'Email không được để trống' },
+      isLength: {
+        errorMessage: 'Email phải có từ 3-20 kí tự',
+        options: { min: 3, max: 50 }
       },
-      errorMessage: 'Mật khẩu cần có ít nhất một chữ cái thường, một chữ cái in hoa, 1 số và 1 ký tự đặc biệt'
+      isEmail: { errorMessage: 'Sai định dạng email' }
+    },
+    password: {
+      in: ['body'],
+      trim: true,
+      isString: { errorMessage: 'Mật khẩu phải là chuỗi kí tự' },
+      notEmpty: { errorMessage: 'Yêu cầu nhập mật khẩu' },
+      isLength: {
+        errorMessage: 'Mật khẩu phải có ít nhất 6 kí tự',
+        options: { min: 6 }
+      },
+      isStrongPassword: {
+        options: {
+          minLength: 6,
+          minLowercase: 1,
+          minUppercase: 1,
+          minNumbers: 1,
+          minSymbols: 1
+        },
+        errorMessage: 'Mật khẩu cần có ít nhất một chữ cái thường, một chữ cái in hoa, 1 số và 1 ký tự đặc biệt'
+      }
     }
-  }
-})
+  },
+  ['body']
+)
 
 export const registerValidator = checkSchema({
   name: {
@@ -78,6 +85,7 @@ export const registerValidator = checkSchema({
   },
   password: {
     in: ['body'],
+
     trim: true,
     isString: { errorMessage: 'Mật khẩu phải là chuỗi kí tự' },
     notEmpty: { errorMessage: 'Yêu cầu nhập mật khẩu' },
@@ -98,6 +106,7 @@ export const registerValidator = checkSchema({
   },
   confirm_password: {
     in: ['body'],
+
     trim: true,
     isString: { errorMessage: 'Mật khẩu xác nhận phải là chuỗi kí tự' },
     notEmpty: { errorMessage: 'Yêu cầu xác nhận lại mật khẩu' },
@@ -120,6 +129,45 @@ export const registerValidator = checkSchema({
       errorMessage: 'Sai định dạng ngày'
     },
     toDate: true
+  }
+})
+
+export const logoutValidator = checkSchema({
+  Authorization: {
+    in: ['headers'],
+    exists: {
+      errorMessage: 'Token không được gửi '
+    },
+    isString: {
+      errorMessage: 'Authorization header must be a string'
+    },
+    custom: {
+      options: async (value, { req }) => {
+        if (value.startsWith('Bearer')) {
+          const token = value.split(' ')[1]
+          const decode_token = userService.verifyAccessToken(token) as AccessTokenPayload
+          if (decode_token.token_type !== TokenType.AccessToken) {
+            throw new Error('Token không hợp lệ')
+          }
+          if (decode_token.exp && Date.now() >= decode_token.exp * 1000) {
+            throw new Error('Token hết hạn sử dụng')
+          }
+          try {
+            const db = await databaseService.getCollection('refresh_tokens')
+            const result = await db.findOne({ user_id: new ObjectId(decode_token.user_id) })
+            if (!result) {
+              throw new Error('Token không tìm thấy ')
+            }
+            req.user_id = decode_token.user_id
+          } catch (error) {
+            throw new Error('Token không có trong DB')
+          }
+        } else {
+          throw new Error('Token không hợp lệ')
+        }
+        return true
+      }
+    }
   }
 })
 

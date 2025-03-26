@@ -4,6 +4,7 @@ import userService from '@/services/users.services'
 import { hashPassword } from '@/utils/crypto'
 import { ApiResponse, RegisterRequest } from '@/types/auth.types'
 import WrappedError from '@/utils/error'
+import { ObjectId } from 'mongodb'
 
 export const loginController = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body
@@ -15,7 +16,7 @@ export const loginController = async (req: Request, res: Response, next: NextFun
     res.json({
       success: true,
       message: 'Đăng nhập thành công',
-      data: user
+      data: { ...user, access_token: `Bearer ${user.access_token}`, refresh_token: `Bearer ${user.refresh_token}` }
     })
   } catch (error) {
     return next(error)
@@ -41,10 +42,21 @@ export const registerController = async (
         name,
         email,
         date_of_birth,
-        access_token,
-        refresh_token
+        access_token: `Bearer ${access_token}`,
+        refresh_token: `Bearer ${refresh_token}`
       }
     })
+    return
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export const logoutController = async (req: Request & { user_id: string }, res: Response, next: NextFunction) => {
+  try {
+    const user_id = req.user_id
+    userService.logout(new ObjectId(user_id))
+    res.status(200).json('Đăng xuất thành công')
     return
   } catch (error) {
     return next(error)
