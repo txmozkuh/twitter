@@ -1,12 +1,12 @@
 import { TokenType } from '@/constants/enums'
-import RefreshToken, { RefreshTokenType } from '@/models/schemas/refreshToken.schema'
+import RefreshToken from '@/models/schemas/refreshToken.schema'
 import User, { UserType } from '@/models/schemas/user.schema'
 import databaseService from '@/services/database.services'
 import { RegisterRequest, LoginRequest } from '@/types/auth.types'
 import { hashPassword } from '@/utils/crypto'
 import WrappedError from '@/utils/error'
 import { signToken } from '@/utils/jwt'
-import { verify } from 'jsonwebtoken'
+import { TokenExpiredError, verify } from 'jsonwebtoken'
 import { ObjectId } from 'mongodb'
 class UserService {
   private signAccessToken(user_id: string) {
@@ -50,7 +50,11 @@ class UserService {
       const decode = verify(access_token, process.env.JWT_PRIVATE_KEY!)
       return decode
     } catch (error) {
-      throw new WrappedError(401, 'Token không hợp lệ')
+      if (error instanceof TokenExpiredError) {
+        throw { custom_error: new WrappedError(401, 'Token hết hạn sử dụng') }
+      } else {
+        throw { custom_error: new WrappedError(401, 'Lỗi xác thực token') }
+      }
     }
   }
 
@@ -64,8 +68,7 @@ class UserService {
         collection.insertOne(new RefreshToken({ token: refresh_token, user_id }))
       }
     } catch (error) {
-      console.log(error)
-      throw new WrappedError(500, 'Failed to store refresh token')
+      throw new WrappedError(500, 'Không lưu được refresh token')
     }
   }
   async register(payload: RegisterRequest) {

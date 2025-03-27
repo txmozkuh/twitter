@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import User from '@/models/schemas/user.schema'
 import userService from '@/services/users.services'
 import { hashPassword } from '@/utils/crypto'
-import { ApiResponse, RegisterRequest } from '@/types/auth.types'
+import { ApiResponse, RegisterRequest, UserIdAddedRequest } from '@/types/auth.types'
 import WrappedError from '@/utils/error'
 import { ObjectId } from 'mongodb'
 
@@ -52,13 +52,14 @@ export const registerController = async (
   }
 }
 
-export const logoutController = async (req: Request & { user_id: string }, res: Response, next: NextFunction) => {
+export const logoutController = async (req: UserIdAddedRequest, res: Response, next: NextFunction) => {
   try {
-    const user_id = req.user_id
+    const { user_id } = req
     userService.logout(new ObjectId(user_id))
     res.status(200).json('Đăng xuất thành công')
     return
   } catch (error) {
-    return next(error)
+    next(error)
+    return
   }
 }

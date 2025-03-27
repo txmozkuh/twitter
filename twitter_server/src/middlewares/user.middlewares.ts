@@ -1,11 +1,11 @@
 import { TokenType } from '@/constants/enums'
+import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import databaseService from '@/services/database.services'
 import userService from '@/services/users.services'
 import { AccessTokenPayload, ApiResponse } from '@/types/auth.types'
 import WrappedError from '@/utils/error'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
-import { validationResult, checkSchema, check } from 'express-validator'
-import { JwtPayload } from 'jsonwebtoken'
+import { validationResult, checkSchema } from 'express-validator'
 import { ObjectId } from 'mongodb'
 
 export const loginValidator = checkSchema(
@@ -136,34 +136,31 @@ export const logoutValidator = checkSchema({
   Authorization: {
     in: ['headers'],
     exists: {
-      errorMessage: 'Token không được gửi '
+      errorMessage: { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không được gửi') }
     },
     isString: {
-      errorMessage: 'Authorization header must be a string'
+      errorMessage: 'Token phải là chuỗi'
     },
     custom: {
       options: async (value, { req }) => {
         if (value.startsWith('Bearer')) {
           const token = value.split(' ')[1]
           const decode_token = userService.verifyAccessToken(token) as AccessTokenPayload
-          if (decode_token.token_type !== TokenType.AccessToken) {
-            throw new Error('Token không hợp lệ')
-          }
-          if (decode_token.exp && Date.now() >= decode_token.exp * 1000) {
-            throw new Error('Token hết hạn sử dụng')
-          }
           try {
+            if (decode_token.token_type !== TokenType.AccessToken) {
+              throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không hợp lệ') }
+            }
             const db = await databaseService.getCollection('refresh_tokens')
             const result = await db.findOne({ user_id: new ObjectId(decode_token.user_id) })
             if (!result) {
-              throw new Error('Token không tìm thấy ')
+              throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Không tìm thấy token') }
             }
             req.user_id = decode_token.user_id
           } catch (error) {
-            throw new Error('Token không có trong DB')
+            throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không hợp lệ') }
           }
         } else {
-          throw new Error('Token không hợp lệ')
+          throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token sai định dạng') }
         }
         return true
       }
@@ -177,8 +174,15 @@ export const validateRequest: RequestHandler = (
   next: NextFunction
 ) => {
   const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    return next(new WrappedError(422, errors.array()[0].msg))
+  if (errors.isEmpty()) {
+    next()
   }
-  next()
+  const first_error = errors.array()[0]
+  if (typeof first_error.msg === 'string') {
+    return next(new WrappedError(HTTP_STATUS.UNPROCESSABLE_ENTITY, first_error.msg))
+  } else {
+    if ('custom_error' in first_error.msg) {
+      return next(first_error.msg.custom_error)
+    }
+  }
 }

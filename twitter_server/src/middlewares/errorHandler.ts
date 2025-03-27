@@ -1,10 +1,10 @@
+import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import { ErrorResponse } from '@/types/auth.types'
 import WrappedError from '@/utils/error'
 import { NextFunction, Request, Response } from 'express'
 
 export const errorHandler = (error: WrappedError, req: Request, res: Response<ErrorResponse>, next: NextFunction) => {
-  console.log('🚨 Error Approached: ', error.message)
-  res.status(error.statusCode || 500).json({
+  res.status(error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
     success: false,
     message: error.message || 'Internal server error'
   })
