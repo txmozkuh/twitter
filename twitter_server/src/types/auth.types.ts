@@ -25,7 +25,7 @@ export interface ErrorResponse {
 
 export type ApiResponse<T> = SuccessResponse<T> | ErrorResponse
 
-export interface AccessTokenPayload extends JwtPayload {
+export interface TokenPayload extends JwtPayload {
   user_id: string
   token_type: TokenType
 }

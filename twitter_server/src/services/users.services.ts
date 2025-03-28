@@ -45,9 +45,9 @@ class UserService {
     }
   }
 
-  verifyAccessToken(access_token: string) {
+  verifyToken(token: string) {
     try {
-      const decode = verify(access_token, process.env.JWT_PRIVATE_KEY!)
+      const decode = verify(token, process.env.JWT_PRIVATE_KEY!)
       return decode
     } catch (error) {
       if (error instanceof TokenExpiredError) {
@@ -67,6 +67,7 @@ class UserService {
       } else {
         collection.insertOne(new RefreshToken({ token: refresh_token, user_id }))
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       throw new WrappedError(500, 'Không lưu được refresh token')
     }
@@ -99,15 +100,17 @@ class UserService {
   }
 
   async logout(user_id: ObjectId) {
-    try {
-      await (
-        await databaseService.getCollection('refresh_tokens')
-      ).deleteOne({
-        user_id
-      })
-    } catch (error) {
-      throw new Error('Lỗi')
-    }
+    await (
+      await databaseService.getCollection('refresh_tokens')
+    ).deleteOne({
+      user_id
+    })
+  }
+
+  async refreshToken(user_id: string) {
+    const { access_token, refresh_token } = await this.signAuthToken(user_id)
+    this.saveRefreshToken(refresh_token, new ObjectId(user_id))
+    return { access_token, refresh_token }
   }
 
   async checkUserExist(email: string) {

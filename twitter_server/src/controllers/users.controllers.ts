@@ -5,6 +5,10 @@ import { hashPassword } from '@/utils/crypto'
 import { ApiResponse, RegisterRequest, UserIdAddedRequest } from '@/types/auth.types'
 import WrappedError from '@/utils/error'
 import { ObjectId } from 'mongodb'
+import { HTTP_STATUS } from '@/constants/httpStatusCode'
+import databaseService from '@/services/database.services'
+import RefreshToken, { RefreshTokenType } from '@/models/schemas/refreshToken.schema'
+import chalk from 'chalk'
 
 export const loginController = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body
@@ -56,8 +60,35 @@ export const logoutController = async (req: UserIdAddedRequest, res: Response, n
   try {
     const { user_id } = req
     userService.logout(new ObjectId(user_id))
-    res.status(200).json('Đăng xuất thành công')
+    res.status(200).json({ success: true, message: 'Đăng xuất thành công' })
     return
+  } catch (error) {
+    next(error)
+    return
+  }
+}
+
+export const refreshTokenController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { refresh_token } = req.body
+    const token = refresh_token.split(' ')[1]
+    const result = await (await databaseService.getCollection('refresh_tokens')).findOne({ token })
+    const { refresh_token: new_refresh_token, access_token } = await userService.refreshToken(
+      result!.user_id.toString()
+    )
+    console.log('Token cũ: ', refresh_token)
+    console.log('Token mới: ', {
+      refresh_token: new_refresh_token,
+      access_token
+    })
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: 'Reset token thành công',
+      data: {
+        refresh_token: new_refresh_token,
+        access_token
+      }
+    })
   } catch (error) {
     next(error)
     return

@@ -2,7 +2,7 @@ import { TokenType } from '@/constants/enums'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import databaseService from '@/services/database.services'
 import userService from '@/services/users.services'
-import { AccessTokenPayload, ApiResponse } from '@/types/auth.types'
+import { ApiResponse, TokenPayload } from '@/types/auth.types'
 import WrappedError from '@/utils/error'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
 import { validationResult, checkSchema } from 'express-validator'
@@ -77,7 +77,7 @@ export const registerValidator = checkSchema({
       options: async (value) => {
         const user = await userService.checkUserExist(value)
         if (user) {
-          throw new Error('Email đã tồn tại')
+          throw { custom_error: new WrappedError(409, 'Email đã tồn tại') }
         }
         return true
       }
@@ -85,7 +85,6 @@ export const registerValidator = checkSchema({
   },
   password: {
     in: ['body'],
-
     trim: true,
     isString: { errorMessage: 'Mật khẩu phải là chuỗi kí tự' },
     notEmpty: { errorMessage: 'Yêu cầu nhập mật khẩu' },
@@ -131,12 +130,11 @@ export const registerValidator = checkSchema({
     toDate: true
   }
 })
-
 export const logoutValidator = checkSchema({
   Authorization: {
     in: ['headers'],
     exists: {
-      errorMessage: { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không được gửi') }
+      errorMessage: { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Không tìm thấy token') }
     },
     isString: {
       errorMessage: 'Token phải là chuỗi'
@@ -145,7 +143,7 @@ export const logoutValidator = checkSchema({
       options: async (value, { req }) => {
         if (value.startsWith('Bearer')) {
           const token = value.split(' ')[1]
-          const decode_token = userService.verifyAccessToken(token) as AccessTokenPayload
+          const decode_token = userService.verifyToken(token) as TokenPayload
           try {
             if (decode_token.token_type !== TokenType.AccessToken) {
               throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không hợp lệ') }
@@ -156,11 +154,38 @@ export const logoutValidator = checkSchema({
               throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Không tìm thấy token') }
             }
             req.user_id = decode_token.user_id
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
           } catch (error) {
             throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không hợp lệ') }
           }
         } else {
           throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token sai định dạng') }
+        }
+        return true
+      }
+    }
+  }
+})
+
+export const refreshTokenValidator = checkSchema({
+  refresh_token: {
+    in: ['body'],
+    exists: { errorMessage: { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Không tìm thấy token') } },
+    custom: {
+      options: async (value) => {
+        const token = value.split(' ')[1]
+        const decode_token = userService.verifyToken(token) as TokenPayload
+        try {
+          if (decode_token.token_type !== TokenType.RefreshToken) {
+            throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không hợp lệ') }
+          }
+          const db = await databaseService.getCollection('refresh_tokens')
+          const result = await db.findOne({ user_id: new ObjectId(decode_token.user_id), token })
+          if (!result) {
+            throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Không tìm thấy token') }
+          }
+        } catch (error) {
+          throw { custom_error: new WrappedError(HTTP_STATUS.UNPROCESSABLE_ENTITY, 'Token không tồn tại ') }
         }
         return true
       }
@@ -174,15 +199,16 @@ export const validateRequest: RequestHandler = (
   next: NextFunction
 ) => {
   const errors = validationResult(req)
-  if (errors.isEmpty()) {
-    next()
-  }
-  const first_error = errors.array()[0]
-  if (typeof first_error.msg === 'string') {
-    return next(new WrappedError(HTTP_STATUS.UNPROCESSABLE_ENTITY, first_error.msg))
-  } else {
-    if ('custom_error' in first_error.msg) {
-      return next(first_error.msg.custom_error)
+  if (!errors.isEmpty()) {
+    const first_error = errors.array()[0]
+    if (typeof first_error.msg === 'string' && first_error.type === 'field') {
+      return next(new WrappedError(HTTP_STATUS.UNPROCESSABLE_ENTITY, first_error.msg))
+    } else {
+      if ('custom_error' in first_error.msg) {
+        return next(first_error.msg.custom_error)
+      }
     }
   }
+
+  next()
 }
