@@ -5,6 +5,7 @@ import { NextFunction, Request, Response } from 'express'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const errorHandler = (error: WrappedError, req: Request, res: Response<ErrorResponse>, next: NextFunction) => {
+  console.log('ERROR APPROACH: ', error)
   res.status(error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
     success: false,
     message: error.message || 'Internal server error'

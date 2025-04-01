@@ -8,43 +8,40 @@ import { NextFunction, Request, RequestHandler, Response } from 'express'
 import { validationResult, checkSchema } from 'express-validator'
 import { ObjectId } from 'mongodb'
 
-export const loginValidator = checkSchema(
-  {
-    email: {
-      in: ['body'],
-      escape: true,
-      trim: true,
-      isString: { errorMessage: 'Email phải là chuỗi kí tự' },
-      notEmpty: { errorMessage: 'Email không được để trống' },
-      isLength: {
-        errorMessage: 'Email phải có từ 3-20 kí tự',
-        options: { min: 3, max: 50 }
-      },
-      isEmail: { errorMessage: 'Sai định dạng email' }
+export const loginValidator = checkSchema({
+  email: {
+    in: ['body'],
+    escape: true,
+    trim: true,
+    isString: { errorMessage: 'Email phải là chuỗi kí tự' },
+    notEmpty: { errorMessage: 'Email không được để trống' },
+    isLength: {
+      errorMessage: 'Email phải có từ 3-20 kí tự',
+      options: { min: 3, max: 50 }
     },
-    password: {
-      in: ['body'],
-      trim: true,
-      isString: { errorMessage: 'Mật khẩu phải là chuỗi kí tự' },
-      notEmpty: { errorMessage: 'Yêu cầu nhập mật khẩu' },
-      isLength: {
-        errorMessage: 'Mật khẩu phải có ít nhất 6 kí tự',
-        options: { min: 6 }
-      },
-      isStrongPassword: {
-        options: {
-          minLength: 6,
-          minLowercase: 1,
-          minUppercase: 1,
-          minNumbers: 1,
-          minSymbols: 1
-        },
-        errorMessage: 'Mật khẩu cần có ít nhất một chữ cái thường, một chữ cái in hoa, 1 số và 1 ký tự đặc biệt'
-      }
-    }
+    isEmail: { errorMessage: 'Sai định dạng email' }
   },
-  ['body']
-)
+  password: {
+    in: ['body'],
+    trim: true,
+    isString: { errorMessage: 'Mật khẩu phải là chuỗi kí tự' },
+    notEmpty: { errorMessage: 'Yêu cầu nhập mật khẩu' },
+    isLength: {
+      errorMessage: 'Mật khẩu phải có ít nhất 6 kí tự',
+      options: { min: 6 }
+    },
+    isStrongPassword: {
+      options: {
+        minLength: 6,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1
+      },
+      errorMessage: 'Mật khẩu cần có ít nhất một chữ cái thường, một chữ cái in hoa, 1 số và 1 ký tự đặc biệt'
+    }
+  }
+})
 
 export const registerValidator = checkSchema({
   name: {
@@ -186,6 +183,24 @@ export const refreshTokenValidator = checkSchema({
           }
         } catch (error) {
           throw { custom_error: new WrappedError(HTTP_STATUS.UNPROCESSABLE_ENTITY, 'Token không tồn tại ') }
+        }
+        return true
+      }
+    }
+  }
+})
+
+export const verifyTokenValidator = checkSchema({
+  email_verify_token: {
+    in: 'body',
+    isString: { errorMessage: 'Token phải là chuỗi' },
+    custom: {
+      options: (value) => {
+        const token = userService.verifyToken(value) as TokenPayload
+        if (token.token_type !== TokenType.EmailVerifyToken) {
+          throw {
+            custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token xác thực tài khoản không hợp lệ')
+          }
         }
         return true
       }

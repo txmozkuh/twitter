@@ -1,4 +1,5 @@
 import { TokenType } from '@/constants/enums'
+import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import RefreshToken from '@/models/schemas/refreshToken.schema'
 import User, { UserType } from '@/models/schemas/user.schema'
 import databaseService from '@/services/database.services'
@@ -30,6 +31,18 @@ class UserService {
       privateKey: process.env.JWT_PRIVATE_KEY!,
       options: {
         expiresIn: Number(process.env.REFRESH_TOKEN_EXPIRE_TIME) || 259200 //3 days
+      }
+    })
+  }
+  private signVerifyToken(user_id: string) {
+    return signToken({
+      payload: {
+        user_id,
+        token_type: TokenType.EmailVerifyToken
+      },
+      privateKey: process.env.JWT_PRIVATE_KEY!,
+      options: {
+        expiresIn: 900 //15m
       }
     })
   }
@@ -73,30 +86,36 @@ class UserService {
     }
   }
   async register(payload: RegisterRequest) {
+    const _id = new ObjectId()
+    const email_verify_token = await this.signVerifyToken(_id.toString())
     const { name, email, password, date_of_birth } = payload
     const hash_password = hashPassword(password)
-    const result = await (
+    await (
       await databaseService.getCollection('users')
-    ).insertOne(new User({ name, email, password: hash_password, date_of_birth }))
-    const user_id = result.insertedId.toString()
-    const { access_token, refresh_token } = await this.signAuthToken(user_id)
-    this.saveRefreshToken(refresh_token, new ObjectId(user_id))
-    return { access_token, refresh_token }
+    ).insertOne(new User({ _id, name, email, password: hash_password, date_of_birth, email_verify_token }))
+    return { email_verify_token }
   }
 
   async login(payload: LoginRequest) {
     const { email, password } = payload
 
-    const result = await (await databaseService.getCollection('users')).findOne({ email, password })
+    const result = (await (
+      await databaseService.getCollection('users')
+    ).findOne({ email, password })) as UserType | null
 
     if (result) {
-      const user_id = result!._id.toString()
+      const user_id = result._id!.toString()
+      const email_verify_token = result.email_verify_token
+      if (email_verify_token) {
+        throw new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Người dùng chưa xác thực')
+      }
       const { access_token, refresh_token } = await this.signAuthToken(user_id)
       this.saveRefreshToken(refresh_token, new ObjectId(user_id))
       const { name, email, date_of_birth, avatar, cover_photo } = result as UserType
       return { user_id, name, email, date_of_birth, avatar, cover_photo, access_token, refresh_token }
+    } else {
+      throw new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Email hoặc tài khoản không đúng')
     }
-    return false
   }
 
   async logout(user_id: ObjectId) {

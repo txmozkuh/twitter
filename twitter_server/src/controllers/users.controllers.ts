@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import User from '@/models/schemas/user.schema'
 import userService from '@/services/users.services'
 import { hashPassword } from '@/utils/crypto'
-import { ApiResponse, RegisterRequest, UserIdAddedRequest } from '@/types/auth.types'
+import { ApiResponse, RegisterRequest, TokenPayload, UserIdAddedRequest } from '@/types/auth.types'
 import WrappedError from '@/utils/error'
 import { ObjectId } from 'mongodb'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
@@ -20,7 +20,11 @@ export const loginController = async (req: Request, res: Response, next: NextFun
     res.json({
       success: true,
       message: 'Đăng nhập thành công',
-      data: { ...user, access_token: `Bearer ${user.access_token}`, refresh_token: `Bearer ${user.refresh_token}` }
+      data: {
+        ...user,
+        access_token: `Bearer ${user.access_token}`,
+        refresh_token: `Bearer ${user.refresh_token}`
+      }
     })
   } catch (error) {
     return next(error)
@@ -29,25 +33,21 @@ export const loginController = async (req: Request, res: Response, next: NextFun
 
 export const registerController = async (
   req: Request<object, object, RegisterRequest>,
-  res: Response<
-    ApiResponse<{ name: string; email: string; date_of_birth: Date; access_token: string; refresh_token: string }>
-  >,
+  res: Response<ApiResponse<{ name: string; email: string; date_of_birth: Date }>>,
   next: NextFunction
 ) => {
   try {
     const { name, email, password, date_of_birth } = req.body
     const user = new User({ name, email, password, date_of_birth })
 
-    const { access_token, refresh_token } = await userService.register(user as RegisterRequest)
+    const { email_verify_token } = await userService.register(user as RegisterRequest)
     res.status(200).json({
       success: true,
-      message: 'Đăng ký người dùng thành công',
+      message: 'Đăng ký người dùng thành công. Vui lòng xác thực email trước khi bắt đầu',
       data: {
         name,
         email,
-        date_of_birth,
-        access_token: `Bearer ${access_token}`,
-        refresh_token: `Bearer ${refresh_token}`
+        date_of_birth
       }
     })
     return
@@ -76,11 +76,6 @@ export const refreshTokenController = async (req: Request, res: Response, next: 
     const { refresh_token: new_refresh_token, access_token } = await userService.refreshToken(
       result!.user_id.toString()
     )
-    console.log('Token cũ: ', refresh_token)
-    console.log('Token mới: ', {
-      refresh_token: new_refresh_token,
-      access_token
-    })
     res.status(HTTP_STATUS.OK).json({
       success: true,
       message: 'Reset token thành công',
@@ -92,5 +87,30 @@ export const refreshTokenController = async (req: Request, res: Response, next: 
   } catch (error) {
     next(error)
     return
+  }
+}
+
+export const verifyTokenController = async (req: Request, res: Response, next: NextFunction) => {
+  const { email_verify_token } = req.body
+  try {
+    const decode_token = userService.verifyToken(email_verify_token) as TokenPayload
+    const result = await (
+      await databaseService.getCollection('users')
+    ).findOneAndUpdate(
+      {
+        _id: new ObjectId(decode_token.user_id),
+        email_verify_token
+      },
+      {
+        $set: {
+          email_verify_token: '',
+          updated_at: new Date()
+        }
+      }
+    )
+    if (!result) throw new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token xác thực không tồn tại hoặc hết hạn')
+    res.status(HTTP_STATUS.OK).json('Xác thực thành công')
+  } catch (error) {
+    next(error)
   }
 }
