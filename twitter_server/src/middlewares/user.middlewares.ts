@@ -72,7 +72,7 @@ export const registerValidator = checkSchema({
     isEmail: { errorMessage: 'Sai định dạng email' },
     custom: {
       options: async (value) => {
-        const user = await userService.checkUserExist(value)
+        const user = await (await databaseService.getCollection('users')).findOne({ email: value })
         if (user) {
           throw { custom_error: new WrappedError(409, 'Email đã tồn tại') }
         }
@@ -205,6 +205,71 @@ export const verifyTokenValidator = checkSchema({
         return true
       }
     }
+  }
+})
+
+export const forgotPasswordValidator = checkSchema({
+  email: {
+    in: ['body'],
+    escape: true,
+    trim: true,
+    isString: { errorMessage: 'Email phải là chuỗi kí tự' },
+    notEmpty: { errorMessage: 'Email không được để trống' },
+    isLength: {
+      errorMessage: 'Email phải có từ 3-20 kí tự',
+      options: { min: 3, max: 50 }
+    },
+    isEmail: { errorMessage: 'Sai định dạng email' },
+    custom: {
+      options: async (value) => {
+        const result = await (await databaseService.getCollection('users')).findOne({ email: value })
+
+        if (!result) throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Email người dùng không tồn tại') }
+
+        return true
+      }
+    }
+  }
+})
+
+export const resetPasswordValidator = checkSchema({
+  new_password: {
+    in: ['body'],
+    trim: true,
+    isString: { errorMessage: 'Mật khẩu phải là chuỗi kí tự' },
+    notEmpty: { errorMessage: 'Yêu cầu nhập mật khẩu mới' },
+    isLength: {
+      errorMessage: 'Mật khẩu phải có ít nhất 6 kí tự',
+      options: { min: 6 }
+    },
+    isStrongPassword: {
+      options: {
+        minLength: 6,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1
+      },
+      errorMessage: 'Mật khẩu cần có ít nhất một chữ cái thường, một chữ cái in hoa, 1 số và 1 ký tự đặc biệt'
+    }
+  },
+  confirm_new_password: {
+    in: ['body'],
+    trim: true,
+    isString: { errorMessage: 'Mật khẩu xác nhận phải là chuỗi kí tự' },
+    notEmpty: { errorMessage: 'Yêu cầu xác nhận lại mật khẩu' },
+    custom: {
+      options: (value, { req }) => {
+        if (value !== req.body.new_password) {
+          throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Mật khẩu xác nhận không khớp') }
+        }
+        return true
+      }
+    }
+  },
+  forgot_password_token: {
+    in: 'body',
+    isString: { errorMessage: 'Token phải là chuỗi' }
   }
 })
 

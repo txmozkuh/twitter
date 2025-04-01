@@ -10,47 +10,23 @@ import { signToken } from '@/utils/jwt'
 import { TokenExpiredError, verify } from 'jsonwebtoken'
 import { ObjectId } from 'mongodb'
 class UserService {
-  private signAccessToken(user_id: string) {
+  private signValidateToken(user_id: string, token_type: TokenType, expiresIn?: number) {
     return signToken({
       payload: {
         user_id,
-        token_type: TokenType.AccessToken
+        token_type
       },
       privateKey: process.env.JWT_PRIVATE_KEY!,
       options: {
-        expiresIn: Number(process.env.ACCESS_TOKEN_EXPIRE_TIME) || 900 //15m
-      }
-    })
-  }
-  private signRefreshToken(user_id: string) {
-    return signToken({
-      payload: {
-        user_id,
-        token_type: TokenType.RefreshToken
-      },
-      privateKey: process.env.JWT_PRIVATE_KEY!,
-      options: {
-        expiresIn: Number(process.env.REFRESH_TOKEN_EXPIRE_TIME) || 259200 //3 days
-      }
-    })
-  }
-  private signVerifyToken(user_id: string) {
-    return signToken({
-      payload: {
-        user_id,
-        token_type: TokenType.EmailVerifyToken
-      },
-      privateKey: process.env.JWT_PRIVATE_KEY!,
-      options: {
-        expiresIn: 900 //15m
+        expiresIn: expiresIn || 900 //15m
       }
     })
   }
 
   private async signAuthToken(user_id: string) {
     const [access_token, refresh_token] = await Promise.all([
-      this.signAccessToken(user_id),
-      this.signRefreshToken(user_id)
+      this.signValidateToken(user_id, TokenType.AccessToken, Number(process.env.ACCESS_TOKEN_EXPIRE_TIME)),
+      this.signValidateToken(user_id, TokenType.RefreshToken, Number(process.env.REFRESH_TOKEN_EXPIRE_TIME))
     ])
     return {
       access_token,
@@ -87,7 +63,7 @@ class UserService {
   }
   async register(payload: RegisterRequest) {
     const _id = new ObjectId()
-    const email_verify_token = await this.signVerifyToken(_id.toString())
+    const email_verify_token = await this.signValidateToken(_id.toString(), TokenType.EmailVerifyToken)
     const { name, email, password, date_of_birth } = payload
     const hash_password = hashPassword(password)
     await (
@@ -132,16 +108,9 @@ class UserService {
     return { access_token, refresh_token }
   }
 
-  async checkUserExist(email: string) {
-    const user = await (
-      await databaseService.getCollection('users')
-    ).findOne({
-      email
-    })
-    if (user) {
-      return true
-    }
-    return false
+  async createForgotPasswordToken(user_id: string) {
+    const forgot_password_token = await this.signValidateToken(user_id, TokenType.ForgotPasswordToken)
+    return forgot_password_token
   }
 }
 

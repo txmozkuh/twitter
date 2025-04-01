@@ -7,7 +7,6 @@ import WrappedError from '@/utils/error'
 import { ObjectId } from 'mongodb'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import databaseService from '@/services/database.services'
-import RefreshToken, { RefreshTokenType } from '@/models/schemas/refreshToken.schema'
 import chalk from 'chalk'
 
 export const loginController = async (req: Request, res: Response, next: NextFunction) => {
@@ -41,6 +40,7 @@ export const registerController = async (
     const user = new User({ name, email, password, date_of_birth })
 
     const { email_verify_token } = await userService.register(user as RegisterRequest)
+    //TODO:Gửi email với email_verify_token nhận được ở trên
     res.status(200).json({
       success: true,
       message: 'Đăng ký người dùng thành công. Vui lòng xác thực email trước khi bắt đầu',
@@ -110,6 +110,52 @@ export const verifyTokenController = async (req: Request, res: Response, next: N
     )
     if (!result) throw new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token xác thực không tồn tại hoặc hết hạn')
     res.status(HTTP_STATUS.OK).json('Xác thực thành công')
+  } catch (error) {
+    next(error)
+  }
+}
+export const forgotPasswordController = async (req: Request, res: Response, next: NextFunction) => {
+  const { email } = req.body
+  try {
+    const db = await databaseService.getCollection('users')
+    const user = await db.findOne({ email })
+    const forgot_password_token = await userService.createForgotPasswordToken(user!._id.toString())
+    db.updateOne(
+      { email },
+      {
+        $set: {
+          forgot_password_token,
+          updated_at: new Date()
+        }
+      }
+    )
+    res
+      .status(HTTP_STATUS.OK)
+      .json({ success: true, message: 'Gửi yêu cầu reset mật khẩu thành công!\n Kiểm tra email của bạn' })
+  } catch (error) {
+    next(error)
+  }
+}
+export const resetPasswordController = async (req: Request, res: Response, next: NextFunction) => {
+  const { new_password, forgot_password_token } = req.body
+  const hass_password = hashPassword(new_password)
+  try {
+    await (
+      await databaseService.getCollection('users')
+    ).updateOne(
+      { forgot_password_token },
+      {
+        $set: {
+          password: hass_password,
+          forgot_password_token: '',
+          updated_at: new Date()
+        }
+      }
+    )
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: 'Cập nhật mật khẩu thành công'
+    })
   } catch (error) {
     next(error)
   }
