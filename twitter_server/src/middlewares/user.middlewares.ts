@@ -2,7 +2,7 @@ import { TokenType } from '@/constants/enums'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import databaseService from '@/services/database.services'
 import userService from '@/services/users.services'
-import { ApiResponse, TokenPayload } from '@/types/auth.types'
+import { TokenPayload } from '@/types/auth.types'
 import WrappedError from '@/utils/error'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
 import { validationResult, checkSchema } from 'express-validator'
@@ -269,15 +269,19 @@ export const resetPasswordValidator = checkSchema({
   },
   forgot_password_token: {
     in: 'body',
-    isString: { errorMessage: 'Token phải là chuỗi' }
+    isString: { errorMessage: 'Token phải là chuỗi' },
+    custom: {
+      options: async (value) => {
+        const result = await (await databaseService.getCollection('users')).findOne({ forgot_password_token: value })
+        if (!result)
+          throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Token không tồn tại hoặc hết hạn') }
+        return true
+      }
+    }
   }
 })
 
-export const validateRequest: RequestHandler = (
-  req: Request,
-  res: Response<ApiResponse<Error>>,
-  next: NextFunction
-) => {
+export const validateRequest: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     const first_error = errors.array()[0]

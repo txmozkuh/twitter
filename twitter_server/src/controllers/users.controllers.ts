@@ -2,14 +2,21 @@ import { NextFunction, Request, Response } from 'express'
 import User from '@/models/schemas/user.schema'
 import userService from '@/services/users.services'
 import { hashPassword } from '@/utils/crypto'
-import { ApiResponse, RegisterRequest, TokenPayload, UserIdAddedRequest } from '@/types/auth.types'
+import { TokenPayload, UserIdAddedRequest } from '@/types/auth.types'
 import WrappedError from '@/utils/error'
 import { ObjectId } from 'mongodb'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import databaseService from '@/services/database.services'
-import chalk from 'chalk'
+import {
+  LoginResponse,
+  refreshTokenResponse,
+  RegisterResponse,
+  SuccessData,
+  SuccessWithoutData
+} from '@/types/response'
+import { RegisterRequest } from '@/types/request'
 
-export const loginController = async (req: Request, res: Response, next: NextFunction) => {
+export const loginController = async (req: Request, res: Response<SuccessData<LoginResponse>>, next: NextFunction) => {
   const { email, password } = req.body
   try {
     const user = await userService.login({ email, password: hashPassword(password) })
@@ -32,7 +39,7 @@ export const loginController = async (req: Request, res: Response, next: NextFun
 
 export const registerController = async (
   req: Request<object, object, RegisterRequest>,
-  res: Response<ApiResponse<{ name: string; email: string; date_of_birth: Date }>>,
+  res: Response<SuccessData<RegisterResponse>>,
   next: NextFunction
 ) => {
   try {
@@ -56,7 +63,11 @@ export const registerController = async (
   }
 }
 
-export const logoutController = async (req: UserIdAddedRequest, res: Response, next: NextFunction) => {
+export const logoutController = async (
+  req: UserIdAddedRequest,
+  res: Response<SuccessWithoutData>,
+  next: NextFunction
+) => {
   try {
     const { user_id } = req
     userService.logout(new ObjectId(user_id))
@@ -68,7 +79,11 @@ export const logoutController = async (req: UserIdAddedRequest, res: Response, n
   }
 }
 
-export const refreshTokenController = async (req: Request, res: Response, next: NextFunction) => {
+export const refreshTokenController = async (
+  req: Request,
+  res: Response<SuccessData<refreshTokenResponse>>,
+  next: NextFunction
+) => {
   try {
     const { refresh_token } = req.body
     const token = refresh_token.split(' ')[1]
@@ -90,7 +105,7 @@ export const refreshTokenController = async (req: Request, res: Response, next: 
   }
 }
 
-export const verifyTokenController = async (req: Request, res: Response, next: NextFunction) => {
+export const verifyTokenController = async (req: Request, res: Response<SuccessWithoutData>, next: NextFunction) => {
   const { email_verify_token } = req.body
   try {
     const decode_token = userService.verifyToken(email_verify_token) as TokenPayload
@@ -109,12 +124,12 @@ export const verifyTokenController = async (req: Request, res: Response, next: N
       }
     )
     if (!result) throw new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token xác thực không tồn tại hoặc hết hạn')
-    res.status(HTTP_STATUS.OK).json('Xác thực thành công')
+    res.status(HTTP_STATUS.OK).json({ success: true, message: 'Xác thực email thành công' })
   } catch (error) {
     next(error)
   }
 }
-export const forgotPasswordController = async (req: Request, res: Response, next: NextFunction) => {
+export const forgotPasswordController = async (req: Request, res: Response<SuccessWithoutData>, next: NextFunction) => {
   const { email } = req.body
   try {
     const db = await databaseService.getCollection('users')
@@ -136,7 +151,7 @@ export const forgotPasswordController = async (req: Request, res: Response, next
     next(error)
   }
 }
-export const resetPasswordController = async (req: Request, res: Response, next: NextFunction) => {
+export const resetPasswordController = async (req: Request, res: Response<SuccessWithoutData>, next: NextFunction) => {
   const { new_password, forgot_password_token } = req.body
   const hass_password = hashPassword(new_password)
   try {
