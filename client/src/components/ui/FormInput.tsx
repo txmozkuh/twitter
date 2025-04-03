@@ -19,7 +19,7 @@ export default function FormInput<T extends FieldValues>({
 }: FormInputProps<T>) {
   const ref = useRef<HTMLInputElement>(null)
   return (
-    <div className=''>
+    <div className='bg-black'>
       <div
         tabIndex={0}
         className='group ring-border-grey focus-within:ring-blue-sky relative box-border overflow-hidden rounded-sm p-2 ring-2 transition-all duration-150 outline-none'
@@ -42,7 +42,7 @@ export default function FormInput<T extends FieldValues>({
           {placeholder}
         </div>
       </div>
-      <div className='mt-1 min-h-2 text-center text-sm text-red-600'>{errorMessage} </div>
+      <div className='mt-2 min-h-2 text-center text-sm text-red-600'>{errorMessage} </div>
     </div>
   )
 }

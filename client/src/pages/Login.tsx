@@ -9,6 +9,9 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
+import { AxiosError } from 'axios'
+import { ErrorData, SuccessData } from '@/types/api'
+import { LoginResponse } from '@/types/response'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -19,8 +22,11 @@ export default function Login() {
     formState: { errors }
   } = useForm<LoginFormType>({ resolver: zodResolver(LoginSchema) })
 
-  const { mutate } = useMutation({ mutationFn: login })
-  const onSubmit: SubmitHandler<LoginFormType> = (data) => {
+  const { mutate } = useMutation<SuccessData<LoginResponse>, AxiosError<ErrorData>, LoginFormType>({
+    mutationKey: ['users', 'login'],
+    mutationFn: (data) => login(data)
+  })
+  const onSubmit: SubmitHandler<LoginFormType> = (data: LoginFormType) => {
     mutate(data, {
       onSuccess: (response) => {
         toast.success('Đăng nhập thành công!')
@@ -28,7 +34,7 @@ export default function Login() {
         navigate('/')
       },
       onError: (error) => {
-        console.log(error.message)
+        console.error(error)
       }
     })
   }
@@ -52,9 +58,12 @@ export default function Login() {
         <button className='mt-4 w-full cursor-pointer rounded-full bg-white py-2 font-semibold text-black'>
           Đăng nhập
         </button>
-        <button className='border-border-grey w-full cursor-pointer rounded-full border-1 py-2 font-semibold'>
+        <Link
+          to={PATH.FORGOR_PASSWORD}
+          className='border-border-grey w-full cursor-pointer rounded-full border-1 py-2 text-center font-semibold'
+        >
           Quên mật khẩu
-        </button>
+        </Link>
       </form>
       <div className='mt-8 space-x-1 text-center'>
         <span className='text-text-grey'>Không có tài khoản?</span>

@@ -7,6 +7,7 @@ const toastConfig: DefaultToastOptions | undefined = {
   duration: 2000,
   removeDelay: 1000,
   style: {
+    width: 'fit',
     background: '#fff',
     color: '#000'
   },
@@ -16,7 +17,7 @@ const toastConfig: DefaultToastOptions | undefined = {
     duration: 3000,
     iconTheme: {
       primary: 'green',
-      secondary: 'black'
+      secondary: 'white'
     }
   }
 }

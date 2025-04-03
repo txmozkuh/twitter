@@ -5,5 +5,5 @@ interface MainLayoutProps {
 }
 
 export default function MainLayout({ children }: MainLayoutProps) {
-  return <div className='w-full h-full bg-gray-500'>{children}</div>
+  return <div className='h-screen w-full'>{children}</div>
 }

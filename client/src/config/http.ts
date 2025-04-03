@@ -18,7 +18,7 @@ class Http {
       }
     )
     this.axiosInstance.interceptors.response.use(
-      function (response) {
+      function (response: AxiosResponse) {
         return response.data
       },
       //HANDLE ERROR: Server Error (Axios ERROR),Network error, unknown error

@@ -2,13 +2,18 @@ import { RegisterFormType, RegisterFormType1, RegisterFormType2, RegisterSchema1
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { PATH } from '@/types/path'
 import FormInput from '@components/ui/FormInput'
 import { register } from '@/services/auth'
 import toast from 'react-hot-toast'
+import { useMutation } from '@tanstack/react-query'
+import { ErrorData, SuccessData } from '@/types/api'
+import { RegisterResponse } from '@/types/response'
+import { AxiosError } from 'axios'
 
 export default function Register() {
+  const navigate = useNavigate()
   const [step, setStep] = useState<number>(1)
   const [dataFirstStep, setDataFirstStep] = useState<RegisterFormType1>()
   const formStep1 = useForm<RegisterFormType1>({
@@ -17,6 +22,10 @@ export default function Register() {
 
   const formStep2 = useForm<RegisterFormType2>({
     resolver: zodResolver(RegisterSchema2)
+  })
+
+  const { mutate } = useMutation<SuccessData<RegisterResponse>, AxiosError<ErrorData>, RegisterFormType>({
+    mutationFn: (data) => register(data)
   })
 
   const onNextStep: SubmitHandler<RegisterFormType1> = async (data) => {
@@ -28,12 +37,12 @@ export default function Register() {
   }
   const onSubmit: SubmitHandler<RegisterFormType2> = async (data) => {
     const registerData: RegisterFormType = { ...dataFirstStep!, ...data }
-    try {
-      const result = await register(registerData)
-      if (result) toast.success('Đăng ký thành công! \n Xác thực để tham gia')
-    } catch (error) {
-      console.error(error)
-    }
+    mutate(registerData, {
+      onSuccess: (response) => {
+        toast.success(response.message)
+        navigate(PATH.LOGIN)
+      }
+    })
   }
   return (
     <div className='grid gap-2'>

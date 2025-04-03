@@ -1,21 +1,25 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface User {
+  user_id: string
   name: string
   email: string
+  date_of_birth: Date
+  avatar: string | undefined
+  cover_photo: string | undefined
   access_token: string
   refresh_token: string
-  cover_photo: string
-  date_of_birth: string
 }
 
 const initialState: User = {
+  user_id: '',
   name: '',
   email: '',
-  access_token: '',
-  refresh_token: '',
+  date_of_birth: new Date(),
+  avatar: '',
   cover_photo: '',
-  date_of_birth: ''
+  access_token: '',
+  refresh_token: ''
 }
 const userSlice = createSlice({
   name: 'user',

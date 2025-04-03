@@ -2,7 +2,7 @@ import CustomToast from '@/components/ui/Toast'
 import RouterElements from '@routes/router'
 export default function App() {
   return (
-    <div>
+    <div className='mx-auto grid h-screen max-w-[1400px] place-items-center'>
       <CustomToast />
       <RouterElements />
     </div>

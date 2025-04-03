@@ -7,6 +7,8 @@ import { Outlet, useRoutes } from 'react-router-dom'
 const Login = lazy(() => import('@pages/Login'))
 const Register = lazy(() => import('@pages/Register'))
 const Profile = lazy(() => import('@pages/Profile'))
+const ForgetPassword = lazy(() => import('@pages/ForgetPassword'))
+const ResetPassword = lazy(() => import('@pages/ResetPassword'))
 
 const RouterElement = () => {
   return useRoutes([
@@ -41,6 +43,14 @@ const RouterElement = () => {
         {
           path: PATH.REGISTER,
           element: <Register />
+        },
+        {
+          path: PATH.FORGOR_PASSWORD,
+          element: <ForgetPassword />
+        },
+        {
+          path: PATH.RESET_PASSWORD,
+          element: <ResetPassword />
         }
       ]
     }
