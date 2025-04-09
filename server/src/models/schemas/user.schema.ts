@@ -11,6 +11,7 @@ export interface UserType {
   updated_at?: Date
   email_verify_token?: string
   forgot_password_token?: string
+
   verify?: UserVerifyStatus
   twitter_circle?: ObjectId[]
   bio?: string

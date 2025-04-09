@@ -1,7 +1,13 @@
 import httpService from '@/config/http'
 import { API_URL, SuccessData, SuccessWithoutData } from '@/types/api'
-import { ForgetPasswordFormType, LoginFormType, RegisterFormType, ResetPasswordFormType } from '@/types/auth'
-import { LoginResponse, RegisterResponse } from '@/types/response'
+import {
+  ForgetPasswordFormType,
+  LoginFormType,
+  RefreshTokenRequest,
+  RegisterFormType,
+  ResetPasswordFormType
+} from '@/types/auth'
+import { LoginResponse, RefreshTokenResponse, RegisterResponse } from '@/types/response'
 
 export const login = async (data: LoginFormType): Promise<SuccessData<LoginResponse>> => {
   return await httpService.post(API_URL.AUTH.LOGIN, data)
@@ -17,4 +23,8 @@ export const requestResetPassword = async (data: ForgetPasswordFormType): Promis
 
 export const resetPassword = async (data: ResetPasswordFormType): Promise<SuccessWithoutData> => {
   return await httpService.post(API_URL.AUTH.RESET_PASSWORD, data)
+}
+
+export const refreshToken = async (data: RefreshTokenRequest): Promise<SuccessData<RefreshTokenResponse>> => {
+  return await httpService.post(API_URL.AUTH.REFRESH_TOKEN, data)
 }

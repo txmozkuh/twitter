@@ -281,6 +281,26 @@ export const resetPasswordValidator = checkSchema({
   }
 })
 
+export const accessTokenValidator = checkSchema({
+  Authorization: {
+    in: ['headers'],
+    exists: {
+      errorMessage: { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Không tìm thấy token') }
+    },
+    custom: {
+      options: async (val, { req }) => {
+        const access_token = val.split(' ')[1]
+        const decode = userService.verifyToken(access_token) as TokenPayload
+        if (decode.token_type !== TokenType.AccessToken) {
+          throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không hợp lệ') }
+        }
+        req.user_id = decode.user_id
+        return true
+      }
+    }
+  }
+})
+
 export const validateRequest: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {

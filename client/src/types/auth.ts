@@ -78,3 +78,7 @@ export type RegisterFormType = RegisterFormType1 & RegisterFormType2
 export type ForgetPasswordFormType = z.infer<typeof ForgetPasswordSchema>
 
 export type ResetPasswordFormType = z.infer<typeof ResetPasswordSchema>
+
+export interface RefreshTokenRequest {
+  refresh_token: string
+}

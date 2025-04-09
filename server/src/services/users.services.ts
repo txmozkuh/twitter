@@ -1,4 +1,4 @@
-import { TokenType } from '@/constants/enums'
+import { ErrorCode, TokenType, UserVerifyStatus } from '@/constants/enums'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import RefreshToken from '@/models/schemas/refreshToken.schema'
 import User, { UserType } from '@/models/schemas/user.schema'
@@ -18,7 +18,7 @@ class UserService {
       },
       privateKey: process.env.JWT_PRIVATE_KEY!,
       options: {
-        expiresIn: expiresIn || 900 //15m
+        expiresIn: expiresIn || 1800 //15m
       }
     })
   }
@@ -40,7 +40,7 @@ class UserService {
       return decode
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        throw { custom_error: new WrappedError(401, 'Token hết hạn sử dụng') }
+        throw { custom_error: new WrappedError(401, 'Token hết hạn sử dụng', ErrorCode.TokenExpired) }
       } else {
         throw { custom_error: new WrappedError(401, 'Lỗi xác thực token') }
       }
@@ -81,14 +81,17 @@ class UserService {
 
     if (result) {
       const user_id = result._id!.toString()
-      const email_verify_token = result.email_verify_token
-      if (email_verify_token) {
+      const verify_status = result.verify
+      const verify_token = result.email_verify_token
+      if (verify_token && verify_status === UserVerifyStatus.Unverified) {
         throw new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Người dùng chưa xác thực')
       }
       const { access_token, refresh_token } = await this.signAuthToken(user_id)
       this.saveRefreshToken(refresh_token, new ObjectId(user_id))
-      const { name, email, date_of_birth, avatar, cover_photo } = result as UserType
-      return { user_id, name, email, date_of_birth, avatar, cover_photo, access_token, refresh_token }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { _id, password, created_at, updated_at, email_verify_token, forgot_password_token, verify, ...userInfo } =
+        result as UserType
+      return { ...userInfo, access_token, refresh_token }
     } else {
       throw new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Email hoặc tài khoản không đúng')
     }

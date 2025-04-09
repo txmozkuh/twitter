@@ -1,5 +1,6 @@
 import MainLayout from '@/components/layouts/MainLayout'
 import RegisterLayout from '@/components/layouts/RegisterLayout'
+import { AuthenticateRoute } from '@/routes/AuthenticateRoute'
 import { PATH } from '@/types/path'
 import { lazy } from 'react'
 import { Outlet, useRoutes } from 'react-router-dom'
@@ -14,19 +15,25 @@ const RouterElement = () => {
   return useRoutes([
     {
       path: '/',
-      element: (
-        <MainLayout>
-          <div>asdd</div>
-        </MainLayout>
-      )
-    },
-    {
-      path: '/profile',
-      element: (
-        <MainLayout>
-          <Profile />
-        </MainLayout>
-      )
+      element: <AuthenticateRoute />,
+      children: [
+        {
+          path: '/home',
+          element: (
+            <MainLayout>
+              <>Home</>
+            </MainLayout>
+          )
+        },
+        {
+          path: '/profile',
+          element: (
+            <MainLayout>
+              <Profile />
+            </MainLayout>
+          )
+        }
+      ]
     },
     {
       path: '/',

@@ -3,7 +3,12 @@ export const API_URL = {
     LOGIN: '/users/login',
     REGISTER: '/users/register',
     FORGET_PASSWORD: '/users/forgot-password',
-    RESET_PASSWORD: '/users/reset-password'
+    RESET_PASSWORD: '/users/reset-password',
+    REFRESH_TOKEN: '/users/refresh-token'
+  },
+  USER: {
+    GET_PROFILE: '/users/profile',
+    UPDATE_PROFILE: '/users/update-profile'
   }
 } as const
 

@@ -1,6 +1,9 @@
+import { ErrorCode } from '@/config/constants/enum'
+import { refreshToken } from '@/services/auth'
+import { logout, refresh_token } from '@/stores/slices/user'
+import { store } from '@/stores/store'
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, isAxiosError } from 'axios'
 import toast from 'react-hot-toast'
-
 class Http {
   axiosInstance: AxiosInstance
   constructor() {
@@ -11,6 +14,11 @@ class Http {
     })
     this.axiosInstance.interceptors.request.use(
       function (request) {
+        const reduxStore = store.getState()
+        const access_token = reduxStore.user.access_token
+        if (access_token) {
+          request.headers.Authorization = `${access_token}`
+        }
         return request
       },
       function (error) {
@@ -27,7 +35,22 @@ class Http {
         if (isAxiosError(error)) {
           //Request send, Error returned from server
           if (error.response) {
-            toast.error(error.response.data.message)
+            if (error.response.status === 401) {
+              if (error.response.data.error === ErrorCode.TokenExpired) {
+                if (error.config?.url === '/users/refresh-token') {
+                  console.log('REFRESH TOKEN HẾT HẠN!')
+                  store.dispatch(logout())
+                  window.location.replace('/login')
+                }
+                const token = store.getState().user.refresh_token
+                refreshToken({ refresh_token: token }).then((response) => {
+                  store.dispatch(refresh_token(response.data))
+                  console.log(response.data)
+                })
+              } else {
+                toast.error(error.response.data.message)
+              }
+            }
             return Promise.reject(error.response.data)
           }
           //Network error:request send, but dont reach server
@@ -37,6 +60,7 @@ class Http {
           }
         }
         //Unexpected Error
+        console.log(error)
         return Promise.reject({ message: 'Lỗi bất ngờ xảy ra' })
       }
     )

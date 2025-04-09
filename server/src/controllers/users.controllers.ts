@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from 'express'
-import User from '@/models/schemas/user.schema'
+import { NextFunction, Request, RequestHandler, Response } from 'express'
+import User, { UserType } from '@/models/schemas/user.schema'
 import userService from '@/services/users.services'
 import { hashPassword } from '@/utils/crypto'
 import { TokenPayload, UserIdAddedRequest } from '@/types/auth.types'
@@ -8,13 +8,15 @@ import { ObjectId } from 'mongodb'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import databaseService from '@/services/database.services'
 import {
+  GetProfileResponse,
   LoginResponse,
   refreshTokenResponse,
   RegisterResponse,
   SuccessData,
   SuccessWithoutData
 } from '@/types/response'
-import { RegisterRequest } from '@/types/request'
+import { CustomRequest, RegisterRequest } from '@/types/request'
+import { UserVerifyStatus } from '@/constants/enums'
 
 export const loginController = async (req: Request, res: Response<SuccessData<LoginResponse>>, next: NextFunction) => {
   const { email, password } = req.body
@@ -119,6 +121,7 @@ export const verifyTokenController = async (req: Request, res: Response<SuccessW
       {
         $set: {
           email_verify_token: '',
+          verify: UserVerifyStatus.Verified,
           updated_at: new Date()
         }
       }
@@ -174,4 +177,48 @@ export const resetPasswordController = async (req: Request, res: Response<Succes
   } catch (error) {
     next(error)
   }
+}
+
+export const getProfileController: RequestHandler = async (
+  req: CustomRequest,
+  res: Response<SuccessData<GetProfileResponse>>,
+  next: NextFunction
+) => {
+  const user_id = (req as CustomRequest).user_id
+  try {
+    const user =
+      ((await (await databaseService.getCollection('users')).findOne({ _id: new ObjectId(user_id) })) as UserType) ||
+      null
+    if (!user) {
+      throw new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không hợp lệ')
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Lấy thông tin thành công',
+      data: {
+        name: user.name,
+        email: user.email,
+        date_of_birth: user.date_of_birth,
+        bio: user.bio,
+        location: user.location,
+        website: user.website,
+        username: user.username,
+        avatar: user.avatar,
+        cover_photo: user.cover_photo
+      }
+    })
+    return
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const updateProfileController = async (req: Request, res: Response<SuccessWithoutData>, next: NextFunction) => {
+  const payload = req.body
+
+  res.status(200).json({
+    message: 'Cập nhật thành công',
+    success: true
+  })
 }

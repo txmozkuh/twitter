@@ -6,7 +6,9 @@ import {
   refreshTokenController,
   verifyTokenController,
   forgotPasswordController,
-  resetPasswordController
+  resetPasswordController,
+  updateProfileController,
+  getProfileController
 } from '@/controllers/users.controllers'
 import {
   loginValidator,
@@ -16,7 +18,8 @@ import {
   verifyTokenValidator,
   validateRequest,
   forgotPasswordValidator,
-  resetPasswordValidator
+  resetPasswordValidator,
+  accessTokenValidator
 } from '@middlewares/user.middlewares'
 
 const userRouter = Router()
@@ -28,5 +31,8 @@ userRouter.post('/refresh-token', refreshTokenValidator, validateRequest, refres
 userRouter.post('/verify-email', verifyTokenValidator, validateRequest, verifyTokenController)
 userRouter.post('/forgot-password', forgotPasswordValidator, validateRequest, forgotPasswordController)
 userRouter.post('/reset-password', resetPasswordValidator, validateRequest, resetPasswordController)
+
+userRouter.get('/profile', accessTokenValidator, validateRequest, getProfileController)
+userRouter.patch('/update-profile', accessTokenValidator, validateRequest, updateProfileController)
 
 export default userRouter

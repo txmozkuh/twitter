@@ -10,7 +10,7 @@ export const errorHandler = (error: WrappedError, req: Request, res: Response<Er
     success: false,
     message: error.message || 'Lỗi server!',
     statusCode: error.statusCode,
-    error: error.name || 'Có lỗi bất ngờ xảy ra',
+    error: error.errorCode || error.name || 'Có lỗi bất ngờ xảy ra',
     timestamp: new Date().toISOString()
   })
 }
