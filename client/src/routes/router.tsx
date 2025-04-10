@@ -18,7 +18,7 @@ const RouterElement = () => {
       element: <AuthenticateRoute />,
       children: [
         {
-          path: '/home',
+          path: PATH.HOME,
           element: (
             <MainLayout>
               <>Home</>
@@ -26,7 +26,7 @@ const RouterElement = () => {
           )
         },
         {
-          path: '/profile',
+          path: PATH.PROFILE,
           element: (
             <MainLayout>
               <Profile />

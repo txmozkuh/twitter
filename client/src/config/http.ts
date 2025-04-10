@@ -45,12 +45,10 @@ class Http {
                 const token = store.getState().user.refresh_token
                 refreshToken({ refresh_token: token }).then((response) => {
                   store.dispatch(refresh_token(response.data))
-                  console.log(response.data)
                 })
-              } else {
-                toast.error(error.response.data.message)
               }
             }
+            toast.error(error.response.data.message)
             return Promise.reject(error.response.data)
           }
           //Network error:request send, but dont reach server

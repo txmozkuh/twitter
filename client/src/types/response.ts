@@ -24,21 +24,21 @@ export interface RefreshTokenResponse {
   access_token: string
 }
 export interface UpdateProfileResponse {
-  name: string
-  email: string
-  date_of_birth: Date
-  avatar: string | undefined
-  cover_photo: string | undefined
-}
-
-export interface UpdateFrofileResponse {
-  name: string
+  name?: string
+  email?: string
+  date_of_birth?: string
+  avatar?: string
+  bio?: string
+  location?: string
+  website?: string
+  username?: string
+  cover_photo?: string
 }
 
 export interface GetProfileResponse {
-  name: string
-  email: string
-  date_of_birth: Date
+  name?: string
+  email?: string
+  date_of_birth?: string
   bio?: string
   location?: string
   website?: string

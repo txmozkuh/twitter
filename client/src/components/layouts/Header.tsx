@@ -3,8 +3,9 @@ import Logo from '@assets/svgs/x_logo.svg'
 import { useQuery } from '@tanstack/react-query'
 import { Home, LogOut, UserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { logout } from '@/stores/slices/user'
+import { logout, update } from '@/stores/slices/user'
 import { useDispatch } from 'react-redux'
+import { useEffect } from 'react'
 interface HeaderProps {
   className?: string
 }
@@ -15,8 +16,11 @@ export default function Header({ className = '' }: HeaderProps) {
     queryKey: ['user', 'getProfile'],
     queryFn: getProfile,
     retry: false,
-    staleTime: 1000 * 60 * 15 // cache for 15 min
+    staleTime: 1000 * 60 * 15 // cache for 15 min,
   })
+  useEffect(() => {
+    if (data) dispatch(update(data.data))
+  }, [data, dispatch])
   const handleGetProfile = () => {
     refetch()
     console.log(data?.data)

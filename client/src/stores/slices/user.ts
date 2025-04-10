@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-
+import { GetProfileResponse } from '@/types/response'
 interface User {
   name: string
   email: string
@@ -35,6 +35,9 @@ const userSlice = createSlice({
     create: (state, action: PayloadAction<User>) => {
       return { ...action.payload }
     },
+    update: (state, action: PayloadAction<GetProfileResponse>) => {
+      return { ...state, ...action.payload }
+    },
     refresh_token: (state, action: PayloadAction<{ refresh_token: string; access_token: string }>) => {
       state.access_token = `Bearer ${action.payload.access_token}`
       state.refresh_token = `Bearer ${action.payload.refresh_token}`
@@ -46,5 +49,5 @@ const userSlice = createSlice({
   }
 })
 
-export const { create, logout, refresh_token } = userSlice.actions
+export const { create, update, logout, refresh_token } = userSlice.actions
 export default userSlice.reducer

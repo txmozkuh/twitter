@@ -31,7 +31,7 @@ export default function Login() {
       onSuccess: (response) => {
         toast.success('Đăng nhập thành công!')
         dispatch(create(response.data))
-        navigate('/')
+        navigate(PATH.HOME)
       },
       onError: (error) => {
         console.error(error)

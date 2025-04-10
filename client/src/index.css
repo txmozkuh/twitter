@@ -32,3 +32,8 @@ body {
   background-color: rgba(100, 100, 100, 0.5); /* Semi-transparent thumb */
   border-radius: 8px;
 }
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px black inset !important; /* your background color */
+  -webkit-text-fill-color: white !important; /* your desired font color */
+  font-family: 'Inter', sans-serif !important; /* your desired font */
+}
