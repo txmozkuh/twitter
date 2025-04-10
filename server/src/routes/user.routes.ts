@@ -19,7 +19,8 @@ import {
   validateRequest,
   forgotPasswordValidator,
   resetPasswordValidator,
-  accessTokenValidator
+  accessTokenValidator,
+  updateProfileValidator
 } from '@middlewares/user.middlewares'
 
 const userRouter = Router()
@@ -33,6 +34,6 @@ userRouter.post('/forgot-password', forgotPasswordValidator, validateRequest, fo
 userRouter.post('/reset-password', resetPasswordValidator, validateRequest, resetPasswordController)
 
 userRouter.get('/profile', accessTokenValidator, validateRequest, getProfileController)
-userRouter.patch('/update-profile', accessTokenValidator, validateRequest, updateProfileController)
+userRouter.patch('/update', accessTokenValidator, updateProfileValidator, validateRequest, updateProfileController)
 
 export default userRouter

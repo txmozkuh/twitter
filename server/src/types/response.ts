@@ -28,7 +28,6 @@ export interface LoginResponse {
   name: string
   email: string
   date_of_birth: Date
-  twitter_circle?: ObjectId[]
   bio?: string
   location?: string
   website?: string
@@ -43,15 +42,12 @@ export interface UpdateProfileResponse {
   name: string
   email: string
   date_of_birth: Date
-  twitter_circle?: ObjectId[]
   bio?: string
   location?: string
   website?: string
   username?: string
   avatar?: string
   cover_photo?: string
-  access_token: string
-  refresh_token: string
 }
 
 export interface refreshTokenResponse {

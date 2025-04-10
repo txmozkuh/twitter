@@ -89,8 +89,17 @@ class UserService {
       const { access_token, refresh_token } = await this.signAuthToken(user_id)
       this.saveRefreshToken(refresh_token, new ObjectId(user_id))
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { _id, password, created_at, updated_at, email_verify_token, forgot_password_token, verify, ...userInfo } =
-        result as UserType
+      const {
+        _id,
+        password,
+        twitter_circle,
+        created_at,
+        updated_at,
+        email_verify_token,
+        forgot_password_token,
+        verify,
+        ...userInfo
+      } = result as UserType
       return { ...userInfo, access_token, refresh_token }
     } else {
       throw new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Email hoặc tài khoản không đúng')

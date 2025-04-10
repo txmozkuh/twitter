@@ -13,7 +13,8 @@ import {
   refreshTokenResponse,
   RegisterResponse,
   SuccessData,
-  SuccessWithoutData
+  SuccessWithoutData,
+  UpdateProfileResponse
 } from '@/types/response'
 import { CustomRequest, RegisterRequest } from '@/types/request'
 import { UserVerifyStatus } from '@/constants/enums'
@@ -214,11 +215,41 @@ export const getProfileController: RequestHandler = async (
   }
 }
 
-export const updateProfileController = async (req: Request, res: Response<SuccessWithoutData>, next: NextFunction) => {
-  const payload = req.body
+export const updateProfileController = async (
+  req: CustomRequest,
+  res: Response<SuccessData<UpdateProfileResponse>>,
+  next: NextFunction
+) => {
+  const user_id = req.user_id
+  const updateData = req.body
+  const filteredData = Object.fromEntries(Object.entries(updateData).filter(([, value]) => value !== undefined))
 
-  res.status(200).json({
-    message: 'Cập nhật thành công',
-    success: true
-  })
+  try {
+    ;(await databaseService.getCollection('users')).updateOne(
+      {
+        _id: new ObjectId(user_id)
+      },
+      { $set: filteredData }
+    )
+    const userData =
+      ((await (await databaseService.getCollection('users')).findOne({ _id: new ObjectId(user_id) })) as UserType) ||
+      null
+    res.status(200).json({
+      message: 'Cập nhật thành công',
+      success: true,
+      data: {
+        username: userData.username,
+        email: userData.email,
+        name: userData.name,
+        date_of_birth: userData.date_of_birth,
+        bio: userData.bio,
+        location: userData.location,
+        website: userData.website,
+        avatar: userData.avatar,
+        cover_photo: userData.cover_photo
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
 }

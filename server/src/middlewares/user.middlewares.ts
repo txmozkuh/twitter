@@ -301,6 +301,83 @@ export const accessTokenValidator = checkSchema({
   }
 })
 
+export const updateProfileValidator = checkSchema(
+  {
+    name: {
+      isString: { errorMessage: 'Tên người dùng phải là chuỗi' },
+      isLength: {
+        options: {
+          min: 6,
+          max: 20
+        },
+        errorMessage: 'Tên phải có độ dài 6-20 kí tự'
+      }
+    },
+    username: {
+      optional: true,
+
+      isString: {
+        errorMessage: 'Tên người dùng phải là chuỗi'
+      },
+      isLength: {
+        options: {
+          min: 6,
+          max: 20
+        },
+        errorMessage: 'Tên đăng nhập phải có độ dài từ 6-20 ký tự'
+      },
+      matches: {
+        options: [/^[a-zA-Z0-9_]+$/],
+        errorMessage: 'Tên người dùng không được chứa khoảng trắng hoặc ký tự đặc biệt (chỉ chữ, số và gạch dưới)'
+      }
+    },
+    date_of_birth: {
+      in: ['body'],
+      optional: true,
+      isISO8601: {
+        options: {
+          strict: true,
+          strictSeparator: true
+        },
+        errorMessage: 'Sai định dạng ngày'
+      },
+      toDate: true
+    },
+    bio: {
+      optional: true,
+      isString: {
+        errorMessage: 'Tiểu sử phải là chuỗi'
+      }
+    },
+    location: {
+      optional: true,
+      isString: {
+        errorMessage: 'Địa điểm phải là chuỗi'
+      }
+    },
+    website: {
+      optional: true,
+      isURL: {
+        errorMessage: 'Website phải là một URL hợp lệ'
+      }
+    },
+    _checkAtLeastOneField: {
+      custom: {
+        options: (value, { req }) => {
+          const hasAnyField = ['name', 'date_of_birth', 'bio', 'location', 'website', 'username'].some(
+            (field) => req.body[field] !== undefined
+          )
+          if (!hasAnyField) {
+            throw new Error('Phải có ít nhất một trường để cập nhật')
+          }
+          return true
+        }
+      }
+    }
+  },
+  ['body']
+)
+
 export const validateRequest: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
