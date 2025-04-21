@@ -56,7 +56,6 @@ class UserService {
       } else {
         collection.insertOne(new RefreshToken({ token: refresh_token, user_id }))
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       throw new WrappedError(500, 'Không lưu được refresh token')
     }
@@ -88,7 +87,6 @@ class UserService {
       }
       const { access_token, refresh_token } = await this.signAuthToken(user_id)
       this.saveRefreshToken(refresh_token, new ObjectId(user_id))
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const {
         _id,
         password,

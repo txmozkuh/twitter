@@ -74,7 +74,7 @@ export const registerValidator = checkSchema({
       options: async (value) => {
         const user = await (await databaseService.getCollection('users')).findOne({ email: value })
         if (user) {
-          throw { custom_error: new WrappedError(409, 'Email đã tồn tại') }
+          throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Email đã tồn tại') }
         }
         return true
       }
@@ -109,7 +109,7 @@ export const registerValidator = checkSchema({
     custom: {
       options: (value, { req }) => {
         if (value !== req.body.password) {
-          throw new Error('Mật khẩu xác nhận không khớp')
+          throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Mật khẩu xác nhận không khớp') }
         }
         return true
       }
@@ -131,7 +131,7 @@ export const logoutValidator = checkSchema({
   Authorization: {
     in: ['headers'],
     exists: {
-      errorMessage: { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Không tìm thấy token') }
+      errorMessage: { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Không tìm thấy token') }
     },
     isString: {
       errorMessage: 'Token phải là chuỗi'
@@ -167,7 +167,7 @@ export const logoutValidator = checkSchema({
 export const refreshTokenValidator = checkSchema({
   refresh_token: {
     in: ['body'],
-    exists: { errorMessage: { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Không tìm thấy token') } },
+    exists: { errorMessage: { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Không tìm thấy token') } },
     custom: {
       options: async (value) => {
         const token = value.split(' ')[1]
@@ -182,7 +182,7 @@ export const refreshTokenValidator = checkSchema({
             throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Không tìm thấy token') }
           }
         } catch (error) {
-          throw { custom_error: new WrappedError(HTTP_STATUS.UNPROCESSABLE_ENTITY, 'Token không tồn tại ') }
+          throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không tồn tại ') }
         }
         return true
       }
@@ -274,7 +274,7 @@ export const resetPasswordValidator = checkSchema({
       options: async (value) => {
         const result = await (await databaseService.getCollection('users')).findOne({ forgot_password_token: value })
         if (!result)
-          throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Token không tồn tại hoặc hết hạn') }
+          throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không tồn tại hoặc hết hạn') }
         return true
       }
     }
@@ -285,7 +285,7 @@ export const accessTokenValidator = checkSchema({
   Authorization: {
     in: ['headers'],
     exists: {
-      errorMessage: { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Không tìm thấy token') }
+      errorMessage: { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Không tìm thấy token') }
     },
     custom: {
       options: async (val, { req }) => {
@@ -304,6 +304,7 @@ export const accessTokenValidator = checkSchema({
 export const updateProfileValidator = checkSchema(
   {
     name: {
+      optional: true,
       isString: { errorMessage: 'Tên người dùng phải là chuỗi' },
       isLength: {
         options: {
@@ -368,7 +369,7 @@ export const updateProfileValidator = checkSchema(
             (field) => req.body[field] !== undefined
           )
           if (!hasAnyField) {
-            throw new Error('Phải có ít nhất một trường để cập nhật')
+            throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Phải có ít nhất 1 trường ') }
           }
           return true
         }
@@ -383,7 +384,7 @@ export const validateRequest: RequestHandler = (req: Request, res: Response, nex
   if (!errors.isEmpty()) {
     const first_error = errors.array()[0]
     if (typeof first_error.msg === 'string' && first_error.type === 'field') {
-      return next(new WrappedError(HTTP_STATUS.UNPROCESSABLE_ENTITY, first_error.msg))
+      return next(new WrappedError(HTTP_STATUS.BAD_REQUEST, first_error.msg))
     } else {
       if ('custom_error' in first_error.msg) {
         return next(first_error.msg.custom_error)

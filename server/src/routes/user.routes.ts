@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Request, Response, Router } from 'express'
 import {
   registerController,
   loginController,
@@ -8,7 +8,9 @@ import {
   forgotPasswordController,
   resetPasswordController,
   updateProfileController,
-  getProfileController
+  getProfileController,
+  updateAvatarController,
+  updateCoverPhotoController
 } from '@/controllers/users.controllers'
 import {
   loginValidator,
@@ -35,5 +37,7 @@ userRouter.post('/reset-password', resetPasswordValidator, validateRequest, rese
 
 userRouter.get('/profile', accessTokenValidator, validateRequest, getProfileController)
 userRouter.patch('/update', accessTokenValidator, updateProfileValidator, validateRequest, updateProfileController)
+userRouter.post('/update-avatar', accessTokenValidator, validateRequest, updateAvatarController)
+userRouter.post('/update-cover', accessTokenValidator, validateRequest, updateCoverPhotoController)
 
 export default userRouter

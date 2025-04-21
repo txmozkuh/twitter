@@ -14,10 +14,12 @@ import {
   RegisterResponse,
   SuccessData,
   SuccessWithoutData,
-  UpdateProfileResponse
+  UpdateProfileResponse,
+  UploadImageResponse
 } from '@/types/response'
 import { CustomRequest, RegisterRequest } from '@/types/request'
 import { UserVerifyStatus } from '@/constants/enums'
+import mediaService from '@/services/medias.services'
 
 export const loginController = async (req: Request, res: Response<SuccessData<LoginResponse>>, next: NextFunction) => {
   const { email, password } = req.body
@@ -223,13 +225,18 @@ export const updateProfileController = async (
   const user_id = req.user_id
   const updateData = req.body
   const filteredData = Object.fromEntries(Object.entries(updateData).filter(([, value]) => value !== undefined))
-
+  console.log(filteredData)
   try {
     ;(await databaseService.getCollection('users')).updateOne(
       {
         _id: new ObjectId(user_id)
       },
-      { $set: filteredData }
+      {
+        $set: filteredData,
+        $currentDate: {
+          updated_at: true
+        }
+      }
     )
     const userData =
       ((await (await databaseService.getCollection('users')).findOne({ _id: new ObjectId(user_id) })) as UserType) ||
@@ -251,5 +258,77 @@ export const updateProfileController = async (
     })
   } catch (error) {
     next(error)
+  }
+}
+
+export const updateAvatarController = async (
+  req: CustomRequest,
+  res: Response<SuccessData<UploadImageResponse>>,
+  next: NextFunction
+) => {
+  try {
+    const user_id = req.user_id
+    const imageUrl = await mediaService.handleUploadImage(req, 'avatar')
+    if (!imageUrl) {
+      return next(new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Upload image failed'))
+    }
+    await (
+      await databaseService.getCollection('users')
+    ).updateOne(
+      {
+        _id: new ObjectId(user_id)
+      },
+      {
+        $set: {
+          avatar: imageUrl,
+          updated_at: new Date()
+        }
+      }
+    )
+    res.status(200).json({
+      success: true,
+      message: 'Cập nhật ảnh đại diện thành công',
+      data: {
+        url: imageUrl
+      }
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export const updateCoverPhotoController = async (
+  req: CustomRequest,
+  res: Response<SuccessData<UploadImageResponse>>,
+  next: NextFunction
+) => {
+  try {
+    const user_id = req.user_id
+    const imageUrl = await mediaService.handleUploadImage(req, 'avatar')
+    if (!imageUrl) {
+      return next(new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Upload image failed'))
+    }
+    await (
+      await databaseService.getCollection('users')
+    ).updateOne(
+      {
+        _id: new ObjectId(user_id)
+      },
+      {
+        $set: {
+          cover_photo: imageUrl,
+          updated_at: new Date()
+        }
+      }
+    )
+    res.status(200).json({
+      success: true,
+      message: 'Cập nhật ảnh bìa thành công',
+      data: {
+        url: imageUrl
+      }
+    })
+  } catch (error) {
+    return next(error)
   }
 }
