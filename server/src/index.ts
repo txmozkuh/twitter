@@ -6,7 +6,7 @@ import cors from 'cors'
 import 'express-async-errors'
 import tweetRouter from '@/routes/tweet.routes'
 import mediaRouter from '@/routes/media.routes'
-import { initFolder } from '@/utils/file'
+import { getPublicId, initFolder } from '@/utils/file'
 
 initFolder()
 

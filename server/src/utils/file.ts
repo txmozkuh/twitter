@@ -11,6 +11,11 @@ export const initFolder = () => {
   }
 }
 
+export const getPublicId = (url: string) => {
+  const result = url.substring(0, url.lastIndexOf('.')).split('/')
+  return `${result[result.length - 2]}/${result[result.length - 1]}`
+}
+
 export const handleUploadImage = async (req: Request) => {
   const form = formidable({
     uploadDir: path.resolve('uploads'),
@@ -27,8 +32,6 @@ export const handleUploadImage = async (req: Request) => {
   })
   return new Promise<File>((resolve, reject) => {
     form.parse(req, (err, fields, files) => {
-      console.log('Fields:', fields)
-      console.log('Files:', files)
       if (err) reject(err)
       if (!files.image) {
         return reject(new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Không tìm thấy file'))

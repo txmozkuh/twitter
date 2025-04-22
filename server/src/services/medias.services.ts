@@ -14,10 +14,19 @@ class MediaService {
     })
     try {
       const result = await cloudinary.uploader.upload(`uploads/${iamgeName}.jpg`, {
-        folder,
-        transformation: { width: 200, height: 200 }
+        folder
+        // transformation: { width: 200, height: 200 }
       })
       return result.secure_url
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  async handleDeleteImage(publicId: string) {
+    try {
+      const result = await cloudinary.uploader.destroy(publicId)
+      return result
     } catch (error) {
       console.error(error)
     }

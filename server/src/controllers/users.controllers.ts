@@ -20,6 +20,7 @@ import {
 import { CustomRequest, RegisterRequest } from '@/types/request'
 import { UserVerifyStatus } from '@/constants/enums'
 import mediaService from '@/services/medias.services'
+import { getPublicId } from '@/utils/file'
 
 export const loginController = async (req: Request, res: Response<SuccessData<LoginResponse>>, next: NextFunction) => {
   const { email, password } = req.body
@@ -225,7 +226,6 @@ export const updateProfileController = async (
   const user_id = req.user_id
   const updateData = req.body
   const filteredData = Object.fromEntries(Object.entries(updateData).filter(([, value]) => value !== undefined))
-  console.log(filteredData)
   try {
     ;(await databaseService.getCollection('users')).updateOne(
       {
@@ -268,9 +268,17 @@ export const updateAvatarController = async (
 ) => {
   try {
     const user_id = req.user_id
+    const user = (await (
+      await databaseService.getCollection('users')
+    ).findOne({ _id: new ObjectId(user_id) })) as UserType
+
     const imageUrl = await mediaService.handleUploadImage(req, 'avatar')
     if (!imageUrl) {
-      return next(new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Upload image failed'))
+      return next(new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Thay đổi ảnh không thành công'))
+    }
+    if (user.avatar) {
+      const publicId = getPublicId(user.avatar)
+      await mediaService.handleDeleteImage(publicId)
     }
     await (
       await databaseService.getCollection('users')
@@ -304,9 +312,16 @@ export const updateCoverPhotoController = async (
 ) => {
   try {
     const user_id = req.user_id
-    const imageUrl = await mediaService.handleUploadImage(req, 'avatar')
+    const user = (await (
+      await databaseService.getCollection('users')
+    ).findOne({ _id: new ObjectId(user_id) })) as UserType
+    const imageUrl = await mediaService.handleUploadImage(req, 'cover_photo')
     if (!imageUrl) {
-      return next(new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Upload image failed'))
+      return next(new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Thay đổi ảnh bìa thất bại'))
+    }
+    if (user.cover_photo) {
+      const publicId = getPublicId(user.cover_photo)
+      await mediaService.handleDeleteImage(publicId)
     }
     await (
       await databaseService.getCollection('users')
