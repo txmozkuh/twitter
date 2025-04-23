@@ -1,3 +1,3 @@
 export enum ErrorCode {
-  TokenExpired = 'Token Expired'
+  TokenError = 'Token Error'
 }

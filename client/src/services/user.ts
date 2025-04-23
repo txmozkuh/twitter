@@ -10,3 +10,11 @@ export const getProfile = async (): Promise<SuccessData<GetProfileResponse>> => 
 export const updateProfile = async (data: UpdateFormType): Promise<SuccessData<UpdateProfileResponse>> => {
   return await httpService.patch(API_URL.USER.UPDATE_PROFILE, data)
 }
+
+export const updateCoverPhoto = async (data: FormData): Promise<SuccessData<{ url: string }>> => {
+  return await httpService.post(API_URL.USER.UPDATE_COVER_PHOTO, data)
+}
+
+export const updateAvatar = async (data: FormData): Promise<SuccessData<{ url: string }>> => {
+  return await httpService.post(API_URL.USER.UPDATE_AVATAR, data)
+}

@@ -9,11 +9,14 @@ class Http {
   constructor() {
     this.axiosInstance = axios.create({
       baseURL: 'http://localhost:3000',
-      timeout: 1000,
-      headers: { 'Content-Type': 'application/json' }
+      timeout: 5000
+      // headers: { 'Content-Type': 'application/json' }
     })
     this.axiosInstance.interceptors.request.use(
       function (request) {
+        if (request.data instanceof FormData) {
+          delete request.headers['Content-Type'] // Let browser set boundary
+        }
         const reduxStore = store.getState()
         const access_token = reduxStore.user.access_token
         if (access_token) {
@@ -36,9 +39,9 @@ class Http {
           //Request send, Error returned from server
           if (error.response) {
             if (error.response.status === 401) {
-              if (error.response.data.error === ErrorCode.TokenExpired) {
+              if (error.response.data.error === ErrorCode.TokenError) {
                 if (error.config?.url === '/users/refresh-token') {
-                  console.log('REFRESH TOKEN HẾT HẠN!')
+                  console.log('Token lỗi!')
                   store.dispatch(logout())
                   window.location.replace('/login')
                 }
@@ -53,12 +56,14 @@ class Http {
           }
           //Network error:request send, but dont reach server
           if (error.request) {
-            toast.error(error.message)
+            toast.error('Lỗi kết nối:' + error.message)
+            store.dispatch(logout())
             return Promise.reject({ message: 'Lấy dữ liệu thất bại. Vui lòng thử lại!' })
           }
         }
         //Unexpected Error
         console.log(error)
+
         return Promise.reject({ message: 'Lỗi bất ngờ xảy ra' })
       }
     )

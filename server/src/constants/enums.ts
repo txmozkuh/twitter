@@ -1,5 +1,5 @@
 export enum ErrorCode {
-  TokenExpired = 'Token Expired'
+  TokenError = 'Token Error'
 }
 
 export enum UserVerifyStatus {

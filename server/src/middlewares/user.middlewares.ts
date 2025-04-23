@@ -1,4 +1,4 @@
-import { TokenType } from '@/constants/enums'
+import { ErrorCode, TokenType } from '@/constants/enums'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import databaseService from '@/services/database.services'
 import userService from '@/services/users.services'
@@ -179,10 +179,14 @@ export const refreshTokenValidator = checkSchema({
           const db = await databaseService.getCollection('refresh_tokens')
           const result = await db.findOne({ user_id: new ObjectId(decode_token.user_id), token })
           if (!result) {
-            throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Không tìm thấy token') }
+            throw {
+              custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Không tìm thấy token', ErrorCode.TokenError)
+            }
           }
         } catch (error) {
-          throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không tồn tại ') }
+          throw {
+            custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không tồn tại ', ErrorCode.TokenError)
+          }
         }
         return true
       }

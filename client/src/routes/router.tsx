@@ -1,5 +1,8 @@
 import MainLayout from '@/components/layouts/MainLayout'
 import RegisterLayout from '@/components/layouts/RegisterLayout'
+import Bookmark from '@/pages/Bookmark'
+import Explore from '@/pages/Explore'
+import Home from '@/pages/Home'
 import { AuthenticateRoute } from '@/routes/AuthenticateRoute'
 import { PATH } from '@/types/path'
 import { lazy } from 'react'
@@ -15,23 +18,27 @@ const RouterElement = () => {
   return useRoutes([
     {
       path: '/',
-      element: <AuthenticateRoute />,
+      element: (
+        <MainLayout>
+          <AuthenticateRoute />
+        </MainLayout>
+      ),
       children: [
         {
           path: PATH.HOME,
-          element: (
-            <MainLayout>
-              <>Home</>
-            </MainLayout>
-          )
+          element: <Home />
         },
         {
           path: PATH.PROFILE,
-          element: (
-            <MainLayout>
-              <Profile />
-            </MainLayout>
-          )
+          element: <Profile />
+        },
+        {
+          path: PATH.EXPLORE,
+          element: <Explore />
+        },
+        {
+          path: PATH.BOOKMARK,
+          element: <Bookmark />
         }
       ]
     },

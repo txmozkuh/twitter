@@ -272,7 +272,15 @@ export const updateAvatarController = async (
       await databaseService.getCollection('users')
     ).findOne({ _id: new ObjectId(user_id) })) as UserType
 
-    const imageUrl = await mediaService.handleUploadImage(req, 'avatar')
+    const imageUrl = await mediaService.handleUploadImage(req, {
+      folder: 'avatar',
+      transformation: {
+        width: 400,
+        height: 400,
+        crop: 'crop',
+        gravity: 'center'
+      }
+    })
     if (!imageUrl) {
       return next(new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Thay đổi ảnh không thành công'))
     }
@@ -315,7 +323,9 @@ export const updateCoverPhotoController = async (
     const user = (await (
       await databaseService.getCollection('users')
     ).findOne({ _id: new ObjectId(user_id) })) as UserType
-    const imageUrl = await mediaService.handleUploadImage(req, 'cover_photo')
+    const imageUrl = await mediaService.handleUploadImage(req, {
+      folder: 'cover_photo'
+    })
     if (!imageUrl) {
       return next(new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Thay đổi ảnh bìa thất bại'))
     }

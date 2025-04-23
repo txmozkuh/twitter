@@ -40,7 +40,7 @@ class UserService {
       return decode
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        throw { custom_error: new WrappedError(401, 'Token hết hạn sử dụng', ErrorCode.TokenExpired) }
+        throw { custom_error: new WrappedError(401, 'Token hết hạn sử dụng', ErrorCode.TokenError) }
       } else {
         throw { custom_error: new WrappedError(401, 'Lỗi xác thực token') }
       }

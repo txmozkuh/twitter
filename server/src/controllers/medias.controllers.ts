@@ -9,7 +9,7 @@ import path from 'path'
 
 //Single Image Upload
 export const uploadImageController = async (req: Request, res: Response, next: NextFunction) => {
-  const imageUrl = await mediaService.handleUploadImage(req)
+  const imageUrl = await mediaService.handleUploadImage(req, {})
   res.status(200).json({
     message: 'Image uploaded successfully',
     data: {

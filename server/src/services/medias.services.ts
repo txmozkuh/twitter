@@ -3,9 +3,10 @@ import { Request } from 'express'
 import sharp from 'sharp'
 import fs from 'fs'
 import cloudinary from '@/utils/cloudinary'
+import { UploadApiOptions } from 'cloudinary'
 
 class MediaService {
-  async handleUploadImage(req: Request, folder: string) {
+  async handleUploadImage(req: Request, uploadOptions: UploadApiOptions) {
     const image = await handleUploadImage(req)
     const iamgeName = image.newFilename.split('.')[0]
     await sharp(image.filepath).jpeg({ mozjpeg: true }).toFile(`uploads/${iamgeName}.jpg`)
@@ -13,10 +14,7 @@ class MediaService {
       console.error(err)
     })
     try {
-      const result = await cloudinary.uploader.upload(`uploads/${iamgeName}.jpg`, {
-        folder
-        // transformation: { width: 200, height: 200 }
-      })
+      const result = await cloudinary.uploader.upload(`uploads/${iamgeName}.jpg`, uploadOptions)
       return result.secure_url
     } catch (error) {
       console.error(error)
