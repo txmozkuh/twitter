@@ -357,3 +357,45 @@ export const updateCoverPhotoController = async (
     return next(error)
   }
 }
+
+export const deleteCoverPhotoController = async (
+  req: CustomRequest,
+  res: Response<SuccessWithoutData>,
+  next: NextFunction
+) => {
+  const user_id = req.user_id as string
+  const empty_cover_photo = 'https://res.cloudinary.com/dv3chhljd/image/upload/v1745553023/black_ucs01a.jpg'
+  try {
+    const cur_cover_photo = (
+      (await (
+        await databaseService.getCollection('users')
+      ).findOne({
+        _id: new ObjectId(user_id)
+      })) as UserType
+    ).cover_photo
+
+    if (cur_cover_photo === empty_cover_photo) {
+      return next(new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Bạn hiện không có ảnh bìa!'))
+    }
+    const publicId = getPublicId(cur_cover_photo!)
+    await mediaService.handleDeleteImage(publicId)
+
+    await (
+      await databaseService.getCollection('users')
+    ).updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          cover_photo: empty_cover_photo,
+          updated_at: new Date()
+        }
+      }
+    )
+    res.status(200).json({
+      success: true,
+      message: 'Xóa ảnh bìa thành công'
+    })
+  } catch (error) {
+    next(error)
+  }
+}

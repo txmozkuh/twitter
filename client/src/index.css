@@ -10,6 +10,10 @@
   --color-transparent-black: rgba(0, 0, 0, 0.8);
 }
 
+html {
+  scrollbar-gutter: stable;
+  padding-right: 0px !important;
+}
 body {
   overscroll-behavior: none;
   background-color: #000;

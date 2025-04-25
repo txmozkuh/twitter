@@ -10,7 +10,8 @@ import {
   updateProfileController,
   getProfileController,
   updateAvatarController,
-  updateCoverPhotoController
+  updateCoverPhotoController,
+  deleteCoverPhotoController
 } from '@/controllers/users.controllers'
 import {
   loginValidator,
@@ -39,5 +40,5 @@ userRouter.get('/profile', accessTokenValidator, validateRequest, getProfileCont
 userRouter.patch('/update', accessTokenValidator, updateProfileValidator, validateRequest, updateProfileController)
 userRouter.post('/update-avatar', accessTokenValidator, validateRequest, updateAvatarController)
 userRouter.post('/update-cover', accessTokenValidator, validateRequest, updateCoverPhotoController)
-
+userRouter.patch('/delete-cover-photo', accessTokenValidator, validateRequest, deleteCoverPhotoController)
 export default userRouter

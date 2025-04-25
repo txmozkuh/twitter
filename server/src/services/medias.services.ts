@@ -9,12 +9,12 @@ class MediaService {
   async handleUploadImage(req: Request, uploadOptions: UploadApiOptions) {
     const image = await handleUploadImage(req)
     const iamgeName = image.newFilename.split('.')[0]
-    await sharp(image.filepath).jpeg({ mozjpeg: true }).toFile(`uploads/${iamgeName}.jpg`)
+    await sharp(image.filepath).avif().toFile(`uploads/${iamgeName}.avif`)
     fs.unlink(image.filepath, (err) => {
       console.error(err)
     })
     try {
-      const result = await cloudinary.uploader.upload(`uploads/${iamgeName}.jpg`, uploadOptions)
+      const result = await cloudinary.uploader.upload(`uploads/${iamgeName}.avif`, uploadOptions)
       return result.secure_url
     } catch (error) {
       console.error(error)

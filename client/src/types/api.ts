@@ -10,7 +10,8 @@ export const API_URL = {
     GET_PROFILE: '/users/profile',
     UPDATE_PROFILE: '/users/update',
     UPDATE_AVATAR: '/users/update-avatar',
-    UPDATE_COVER_PHOTO: '/users/update-cover'
+    UPDATE_COVER_PHOTO: '/users/update-cover',
+    DELETE_COVER_PHOTO: '/users/delete-cover-photo'
   }
 } as const
 

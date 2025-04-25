@@ -1,13 +1,13 @@
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import FormInput from '@/components/ui/FormInput'
-import { CircleX, ImagePlus, Loader, X } from 'lucide-react'
+import { CircleX, ImagePlus, LoaderCircle, X } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { UpdateFormSchema, UpdateFormType } from '@/types/user'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { updateAvatar, updateCoverPhoto, updateProfile } from '@/services/user'
-import { ErrorData, SuccessData } from '@/types/api'
+import { deleteCoverPhoto, updateAvatar, updateCoverPhoto, updateProfile } from '@/services/user'
+import { ErrorData, SuccessData, SuccessWithoutData } from '@/types/api'
 import { UpdateProfileResponse } from '@/types/response'
 import { AxiosError } from 'axios'
 import { useSelector } from 'react-redux'
@@ -38,6 +38,11 @@ export default function Update({ isOpen, handleOpenModal }: UpdateModalProps) {
   const updateAvatarMutation = useMutation<SuccessData<{ url: string }>, AxiosError<ErrorData>, FormData>({
     mutationFn: (data) => updateAvatar(data)
   })
+
+  const deleteCoverPhotoMutation = useMutation<SuccessWithoutData, AxiosError<ErrorData>>({
+    mutationFn: deleteCoverPhoto
+  })
+
   const coverInputRef = useRef<HTMLInputElement>(null)
   const avatarIputRef = useRef<HTMLInputElement>(null)
 
@@ -109,6 +114,19 @@ export default function Update({ isOpen, handleOpenModal }: UpdateModalProps) {
       }
     })
   }
+
+  const handleDeleteCoverPhoto = async () => {
+    deleteCoverPhotoMutation.mutate(undefined, {
+      onSuccess: (res) => {
+        toast.success(res.message)
+        queryClient.invalidateQueries({ queryKey: ['user', 'getProfile'] })
+      },
+      onError: (err) => {
+        console.error(err)
+      }
+    })
+  }
+
   return (
     <Dialog open={isOpen} onClose={() => handleOpenModal(false)} className='relative z-50'>
       <DialogBackdrop className='fixed inset-0 bg-white/20' />
@@ -135,10 +153,13 @@ export default function Update({ isOpen, handleOpenModal }: UpdateModalProps) {
                     onClick={() => coverInputRef.current?.click()}
                     disabled={updateCoverPhotoMutation.isPending}
                   >
-                    {updateCoverPhotoMutation.isPending ? <Loader className='animate-spin' /> : <ImagePlus />}
+                    {updateCoverPhotoMutation.isPending ? <LoaderCircle className='animate-spin' /> : <ImagePlus />}
                   </button>
-                  <button className='size-fit cursor-pointer rounded-full bg-white/5 p-3 hover:bg-white/10'>
-                    <X />
+                  <button
+                    className='size-fit cursor-pointer rounded-full bg-white/5 p-3 hover:bg-white/10'
+                    onClick={handleDeleteCoverPhoto}
+                  >
+                    {deleteCoverPhotoMutation.isPending ? <LoaderCircle className='animate-spin' /> : <X />}
                   </button>
                 </div>
               </div>
@@ -160,7 +181,7 @@ export default function Update({ isOpen, handleOpenModal }: UpdateModalProps) {
                   disabled={updateAvatarMutation.isPending}
                 >
                   {updateAvatarMutation.isPending ? (
-                    <Loader className='size-5 animate-spin' />
+                    <LoaderCircle className='size-5 animate-spin' />
                   ) : (
                     <ImagePlus className='size-5' />
                   )}
