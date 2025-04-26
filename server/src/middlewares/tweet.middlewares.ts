@@ -77,8 +77,8 @@ export const createTweetValidator = checkSchema({
     isArray: { errorMessage: 'Hashtags phải là một array' },
     custom: {
       options: (value) => {
-        if (!value.every((item: unknown) => typeof item !== 'string')) {
-          throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Hashtags phải gồm các chuỗi ') }
+        if (value.some((item: any) => typeof item !== 'string' || item.length === 0)) {
+          throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Hashtags phải gồm các chuỗi không rỗng') }
         }
         return true
       }

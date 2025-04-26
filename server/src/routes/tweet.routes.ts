@@ -6,6 +6,6 @@ import { Router } from 'express'
 
 const tweetRouter = Router()
 
-tweetRouter.post('/', accessTokenValidator, createTweetValidator, validateRequest, createTweetController)
+tweetRouter.post('/create', accessTokenValidator, createTweetValidator, validateRequest, createTweetController)
 
 export default tweetRouter
