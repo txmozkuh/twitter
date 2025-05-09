@@ -9,7 +9,7 @@ class WrappedError extends Error {
     super(message)
     this.statusCode = statusCode
     this.isCustomError = true
-    this.errorCode = errorCode
+    this.errorCode = errorCode || ErrorCode.NormalError
     Object.setPrototypeOf(this, new.target.prototype)
   }
 }

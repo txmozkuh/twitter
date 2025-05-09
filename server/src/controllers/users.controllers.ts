@@ -18,7 +18,7 @@ import {
   UploadImageResponse
 } from '@/types/response'
 import { CustomRequest, RegisterRequest } from '@/types/request'
-import { UserVerifyStatus } from '@/constants/enums'
+import { ErrorCode, TokenType, UserVerifyStatus } from '@/constants/enums'
 import mediaService from '@/services/medias.services'
 import { getPublicId } from '@/utils/file'
 
@@ -130,7 +130,12 @@ export const verifyTokenController = async (req: Request, res: Response<SuccessW
         }
       }
     )
-    if (!result) throw new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token xác thực không tồn tại hoặc hết hạn')
+    if (!result)
+      throw new WrappedError(
+        HTTP_STATUS.UNAUTHORIZED,
+        'Token xác thực không tồn tại hoặc hết hạn',
+        ErrorCode.TokenError
+      )
     res.status(HTTP_STATUS.OK).json({ success: true, message: 'Xác thực email thành công' })
   } catch (error) {
     next(error)

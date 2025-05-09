@@ -7,6 +7,8 @@ import 'express-async-errors'
 import tweetRouter from '@/routes/tweet.routes'
 import mediaRouter from '@/routes/media.routes'
 import { getPublicId, initFolder } from '@/utils/file'
+import { sendVerifyEmail } from '@/utils/email'
+import bookmarkRouter from '@/routes/bookmark.routes'
 
 initFolder()
 
@@ -32,6 +34,7 @@ app.use(
 app.use('/users', userRouter)
 app.use('/tweets', tweetRouter)
 app.use('/medias', mediaRouter)
+app.use('/bookmarks', bookmarkRouter)
 app.use(errorHandler)
 
 app.listen(PORT, () => {

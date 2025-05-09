@@ -1,4 +1,5 @@
 export enum ErrorCode {
+  NormalError = 'Error',
   TokenError = 'Token Error'
 }
 

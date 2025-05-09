@@ -28,3 +28,7 @@ export interface TweetRequest {
   mentions: string[] // user_id[]
   medias: Media[]
 }
+
+export interface BookmarkRequest {
+  tweet_id: string
+}
