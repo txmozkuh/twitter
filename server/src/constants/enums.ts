@@ -51,3 +51,8 @@ export enum PeopleFollow {
   Anyone = '0',
   Following = '1'
 }
+
+export enum FilterOrder {
+  Asc = 'asc',
+  Dsc = 'dsc'
+}

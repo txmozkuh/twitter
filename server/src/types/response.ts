@@ -1,3 +1,4 @@
+import { FilterOrder } from '@/constants/enums'
 import { ObjectId } from 'mongodb'
 
 export interface ErrorData {
@@ -69,4 +70,11 @@ export interface GetProfileResponse {
 
 export interface UploadImageResponse {
   url: string
+}
+
+export interface FilterDataList<T> {
+  total_item: number
+  order_by: string
+  order: FilterOrder
+  data: T[]
 }
