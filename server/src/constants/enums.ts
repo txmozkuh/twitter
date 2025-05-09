@@ -1,6 +1,7 @@
 export enum ErrorCode {
   NormalError = 'Error',
-  TokenError = 'Token Error'
+  TokenError = 'Token Error',
+  TweetInvalid = 'Invalid Tweet'
 }
 
 export enum UserVerifyStatus {

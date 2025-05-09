@@ -1,6 +1,7 @@
-import { MediaType, TweetAudience, TweetType } from '@/constants/enums'
+import { ErrorCode, MediaType, TweetAudience, TweetType } from '@/constants/enums'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import { Media } from '@/models/schemas/media'
+import databaseService from '@/services/database.services'
 import WrappedError from '@/utils/error'
 import { checkSchema } from 'express-validator'
 import { isEmpty } from 'lodash'
@@ -113,6 +114,25 @@ export const createTweetValidator = checkSchema({
           throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Media phải chứa các media Object') }
         }
         return true
+      }
+    }
+  }
+})
+
+export const getTweetDetailValidator = checkSchema({
+  tweet_id: {
+    in: 'params',
+    custom: {
+      options: async (value: string) => {
+        if (ObjectId.isValid(value)) {
+          const result = await (
+            await databaseService.getCollection(process.env.TWEETS_COLLECTION || 'tweets')
+          ).findOne({ _id: new ObjectId(value) })
+          if (result) return true
+        }
+        throw {
+          custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Tweet không khả dụng', ErrorCode.TweetInvalid)
+        }
       }
     }
   }
