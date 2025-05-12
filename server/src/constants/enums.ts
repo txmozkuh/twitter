@@ -52,7 +52,7 @@ export enum PeopleFollow {
   Following = '1'
 }
 
-export enum FilterOrder {
-  Asc = 'asc',
-  Dsc = 'dsc'
+export enum SortOrder {
+  Asc = 1,
+  Dsc = -1
 }

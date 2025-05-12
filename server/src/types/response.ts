@@ -1,4 +1,4 @@
-import { FilterOrder } from '@/constants/enums'
+import { SortOrder } from '@/constants/enums'
 import { ObjectId } from 'mongodb'
 
 export interface ErrorData {
@@ -73,8 +73,10 @@ export interface UploadImageResponse {
 }
 
 export interface FilterDataList<T> {
-  total_item: number
-  order_by: string
-  order: FilterOrder
+  total: number
+  page: number
+  item_per_page: number
+  sort_by: string
+  sort_order: SortOrder
   data: T[]
 }

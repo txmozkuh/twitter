@@ -1,4 +1,4 @@
-import { FilterOrder } from '@/constants/enums'
+import { SortOrder } from '@/constants/enums'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import Tweet from '@/models/schemas/tweet.schema'
 import databaseService from '@/services/database.services'
@@ -55,9 +55,11 @@ export const getTweetListController = async (
     success: true,
     message: 'Lấy detail tweet thành công',
     data: {
-      total_item: 5,
-      order: FilterOrder.Asc,
-      order_by: '',
+      page: 1,
+      item_per_page: 5,
+      total: 5,
+      sort_order: SortOrder.Asc,
+      sort_by: '',
       data: result
     }
   })

@@ -8,3 +8,4 @@ bookmarkRouter.post('/', accessTokenValidator, createBookmarkValidator, validate
 bookmarkRouter.delete('/tweet/:tweet_id', accessTokenValidator, validateRequest, deleteBookmarkController)
 
 export default bookmarkRouter
+
