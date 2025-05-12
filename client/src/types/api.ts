@@ -12,6 +12,10 @@ export const API_URL = {
     UPDATE_AVATAR: '/users/update-avatar',
     UPDATE_COVER_PHOTO: '/users/update-cover',
     DELETE_COVER_PHOTO: '/users/delete-cover-photo'
+  },
+  TWEET: {
+    GET_TWEETS: '/tweets',
+    GET_TWEET_DETAIL: '/tweets/detail'
   }
 } as const
 

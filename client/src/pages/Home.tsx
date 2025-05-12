@@ -1,5 +1,7 @@
+import Tweet from '@/components/ui/Tweet'
 import TweetEditor from '@/components/ui/TweetEditor'
 import { RootState } from '@/stores/store'
+import { posts } from '@/utils/fakeData'
 import { useSelector } from 'react-redux'
 
 export default function Home() {
@@ -23,6 +25,15 @@ export default function Home() {
         </div>
         <TweetEditor />
       </div>
+      {posts.map((post) => (
+        <Tweet
+          user_avatar={post.user_avatar}
+          name={post.name}
+          username={post.username}
+          content={post.content}
+          images={post.images}
+        />
+      ))}
     </div>
   )
 }

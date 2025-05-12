@@ -3,6 +3,7 @@ import RegisterLayout from '@/components/layouts/RegisterLayout'
 import Bookmark from '@/pages/Bookmark'
 import Explore from '@/pages/Explore'
 import Home from '@/pages/Home'
+import TweetDetail from '@/pages/TweetDetail'
 import { AuthenticateRoute } from '@/routes/AuthenticateRoute'
 import { PATH } from '@/types/path'
 import { lazy } from 'react'
@@ -39,6 +40,10 @@ const RouterElement = () => {
         {
           path: PATH.BOOKMARK,
           element: <Bookmark />
+        },
+        {
+          path: PATH.TWEET_DETAIL,
+          element: <TweetDetail />
         }
       ]
     },

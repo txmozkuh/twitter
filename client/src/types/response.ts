@@ -46,3 +46,7 @@ export interface GetProfileResponse {
   avatar?: string
   cover_photo?: string
 }
+
+export interface GetTweetsResponse {}
+
+export interface GetTweetDetailResponse {}

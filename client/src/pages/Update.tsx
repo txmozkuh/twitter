@@ -153,13 +153,21 @@ export default function Update({ isOpen, handleOpenModal }: UpdateModalProps) {
                     onClick={() => coverInputRef.current?.click()}
                     disabled={updateCoverPhotoMutation.isPending}
                   >
-                    {updateCoverPhotoMutation.isPending ? <LoaderCircle className='animate-spin' /> : <ImagePlus />}
+                    {updateCoverPhotoMutation.isPending ? (
+                      <LoaderCircle className='stroke-blue-sky animate-spin' />
+                    ) : (
+                      <ImagePlus />
+                    )}
                   </button>
                   <button
                     className='size-fit cursor-pointer rounded-full bg-white/5 p-3 hover:bg-white/10'
                     onClick={handleDeleteCoverPhoto}
                   >
-                    {deleteCoverPhotoMutation.isPending ? <LoaderCircle className='animate-spin' /> : <X />}
+                    {deleteCoverPhotoMutation.isPending ? (
+                      <LoaderCircle className='stroke-blue-sky animate-spin' />
+                    ) : (
+                      <X />
+                    )}
                   </button>
                 </div>
               </div>
@@ -181,7 +189,7 @@ export default function Update({ isOpen, handleOpenModal }: UpdateModalProps) {
                   disabled={updateAvatarMutation.isPending}
                 >
                   {updateAvatarMutation.isPending ? (
-                    <LoaderCircle className='size-5 animate-spin' />
+                    <LoaderCircle className='stroke-blue-sky size-5 animate-spin' />
                   ) : (
                     <ImagePlus className='size-5' />
                   )}
@@ -227,7 +235,9 @@ export default function Update({ isOpen, handleOpenModal }: UpdateModalProps) {
               placeholder='Birthday'
               errorMessage={errors.date_of_birth?.message}
             />
-            <button className='ml-auto rounded-full bg-white px-6 py-1 text-black'>Save</button>
+            <button className='hover:text-blue-sky ml-auto cursor-pointer rounded-full bg-white px-6 py-1 text-black'>
+              Save
+            </button>
           </form>
         </DialogPanel>
       </div>

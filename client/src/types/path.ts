@@ -1,6 +1,7 @@
 export const PATH = {
   HOME: '/home',
   PROFILE: '/profile',
+  TWEET_DETAIL: 'tweet/:id',
   LOGIN: '/login',
   EXPLORE: '/explore',
   BOOKMARK: '/bookmark',
