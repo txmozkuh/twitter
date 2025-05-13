@@ -1,3 +1,4 @@
+import { env } from '@/config/env'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import Bookmark from '@/models/schemas/bookmark.schema'
 import databaseService from '@/services/database.services'
@@ -7,7 +8,7 @@ import { ObjectId } from 'mongodb'
 
 class BookmarkService {
   async createBookmark(tweet_id: ObjectId, user_id: ObjectId) {
-    const cll = await databaseService.getCollection(process.env.BOOKMARK_COLLECTION || 'bookmarks')
+    const cll = await databaseService.getCollection(env.BOOKMARKS_COLLECTION || 'bookmarks')
     const bookmark = await cll.findOne({ tweet_id })
 
     if (bookmark) {
@@ -19,7 +20,7 @@ class BookmarkService {
   }
 
   async deleteBookmark(tweet_id: ObjectId) {
-    const cll = await databaseService.getCollection(process.env.BOOKMARK_COLLECTION || 'bookmarks')
+    const cll = await databaseService.getCollection(env.BOOKMARKS_COLLECTION || 'bookmarks')
     const bookmark = await cll.findOne({ tweet_id })
     if (!bookmark) throw new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Tweet này chưa được bookmark')
     else {

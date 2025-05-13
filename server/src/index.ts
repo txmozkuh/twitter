@@ -1,15 +1,16 @@
-import express from 'express'
-import userRouter from '@routes/user.routes'
-import databaseService from '@/services/database.services'
-import { errorHandler } from '@/middlewares/errorHandler'
-import cors from 'cors'
 import 'express-async-errors'
-import tweetRouter from '@/routes/tweet.routes'
-import mediaRouter from '@/routes/media.routes'
+import express from 'express'
+import cors from 'cors'
+import { errorHandler } from '@/middlewares/errorHandler'
+import { env } from './config/env'
 import { getPublicId, initFolder } from '@/utils/file'
 import { sendVerifyEmail } from '@/utils/email'
+import databaseService from '@/services/database.services'
+import userRouter from '@routes/user.routes'
+import tweetRouter from '@/routes/tweet.routes'
+import mediaRouter from '@/routes/media.routes'
 import bookmarkRouter from '@/routes/bookmark.routes'
-import { env } from './config/env'
+import likeRouter from './routes/like.routes'
 
 initFolder()
 
@@ -36,6 +37,8 @@ app.use('/users', userRouter)
 app.use('/tweets', tweetRouter)
 app.use('/medias', mediaRouter)
 app.use('/bookmarks', bookmarkRouter)
+app.use('/likes', likeRouter)
+
 app.use(errorHandler)
 
 app.listen(PORT, () => {

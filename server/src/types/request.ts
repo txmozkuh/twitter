@@ -32,3 +32,7 @@ export interface TweetRequest {
 export interface BookmarkRequest {
   tweet_id: string
 }
+
+export interface LikeRequest {
+  tweet_id: string
+}
