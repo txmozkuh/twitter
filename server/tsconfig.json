@@ -16,7 +16,8 @@
       "@models/*": ["src/models/*"],
       "@middlewares/*": ["src/middlewares/*"],
       "@utils/*": ["src/utils/*"],
-      "@types/*": ["src/types/*"]
+      "@types/*": ["src/types/*"],
+      "@config/*": ["src/config/*"]
     }
   },
   "files": ["src/type.d.ts"], // Các file dùng để defined global type cho dự án

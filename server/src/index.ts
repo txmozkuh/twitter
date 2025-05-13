@@ -9,6 +9,7 @@ import mediaRouter from '@/routes/media.routes'
 import { getPublicId, initFolder } from '@/utils/file'
 import { sendVerifyEmail } from '@/utils/email'
 import bookmarkRouter from '@/routes/bookmark.routes'
+import { env } from './config/env'
 
 initFolder()
 
@@ -20,7 +21,7 @@ databaseService
   .catch((err) => console.log('Fail to connect database', err))
 
 const app = express()
-const PORT = process.env.PORT || 3000
+const PORT = env.PORT || 3000
 
 app.use(cors())
 app.use(express.json())

@@ -1,7 +1,7 @@
-import dotenv from 'dotenv'
-dotenv.config()
 import User from '@/models/schemas/user.schema'
 import { Db, MongoClient, Collection, Document } from 'mongodb'
+
+import { env } from '@config/env'
 
 class DatabaseService {
   private static instance: DatabaseService
@@ -10,7 +10,7 @@ class DatabaseService {
   private database: Db | null = null
 
   private constructor() {
-    this.client = new MongoClient(process.env.MONGO_URI as string)
+    this.client = new MongoClient(env.MONGO_URI)
   }
 
   public static getInstance(): DatabaseService {
@@ -23,7 +23,7 @@ class DatabaseService {
   async connect(): Promise<Db> {
     if (!this.database) {
       await this.client.connect()
-      this.database = this.client.db(process.env.DB_NAME)
+      this.database = this.client.db(env.DB_NAME)
     }
     return this.database
   }
