@@ -9,6 +9,7 @@ import WrappedError from '@/utils/error'
 import { signToken } from '@/utils/jwt'
 import { TokenExpiredError, verify } from 'jsonwebtoken'
 import { ObjectId } from 'mongodb'
+import { env } from '@config/env'
 class UserService {
   private signValidateToken(user_id: string, token_type: TokenType, expiresIn?: number) {
     return signToken({
@@ -16,7 +17,7 @@ class UserService {
         user_id,
         token_type
       },
-      privateKey: process.env.JWT_PRIVATE_KEY!,
+      privateKey: env.JWT_PRIVATE_KEY!,
       options: {
         expiresIn: expiresIn || 1800 //15m
       }
@@ -25,8 +26,8 @@ class UserService {
 
   private async signAuthToken(user_id: string) {
     const [access_token, refresh_token] = await Promise.all([
-      this.signValidateToken(user_id, TokenType.AccessToken, Number(process.env.ACCESS_TOKEN_EXPIRE_TIME)),
-      this.signValidateToken(user_id, TokenType.RefreshToken, Number(process.env.REFRESH_TOKEN_EXPIRE_TIME))
+      this.signValidateToken(user_id, TokenType.AccessToken, Number(env.ACCESS_TOKEN_EXPIRE_TIME)),
+      this.signValidateToken(user_id, TokenType.RefreshToken, Number(env.REFRESH_TOKEN_EXPIRE_TIME))
     ])
     return {
       access_token,
@@ -36,7 +37,7 @@ class UserService {
 
   verifyToken(token: string) {
     try {
-      const decode = verify(token, process.env.JWT_PRIVATE_KEY!)
+      const decode = verify(token, env.JWT_PRIVATE_KEY!)
       return decode
     } catch (error) {
       if (error instanceof TokenExpiredError) {

@@ -295,7 +295,6 @@ export const accessTokenValidator = checkSchema({
       options: async (val, { req }) => {
         const access_token = val.split(' ')[1]
         const decode = userService.verifyToken(access_token) as TokenPayload
-        console.log(decode)
         if (decode.token_type !== TokenType.AccessToken) {
           throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không hợp lệ') }
         }

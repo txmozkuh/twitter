@@ -7,6 +7,7 @@ import { CustomRequest } from '@/types/request'
 import { FilterDataList, SuccessData, SuccessWithoutData } from '@/types/response'
 import { NextFunction, Request, Response } from 'express'
 import { ObjectId } from 'mongodb'
+import { env } from '@config/env'
 
 export const createTweetController = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user_id = req.user_id
@@ -25,7 +26,7 @@ export const getTweetController = async (req: CustomRequest, res: Response<Succe
   const user_id = req.user_id
   const { tweet_id } = req.params
   const result = (await (
-    await databaseService.getCollection(process.env.TWEETS_COLLECTION || 'tweets')
+    await databaseService.getCollection(env.TWEETS_COLLECTION || 'tweets')
   ).findOne({ _id: new ObjectId(tweet_id as string) })) as Tweet
   res.json({
     success: true,
@@ -43,7 +44,7 @@ export const getTweetListController = async (
   const user_id = req.user_id
   const { tweet_id } = req.params
   const result = (await (
-    await databaseService.getCollection(process.env.TWEETS_COLLECTION || 'tweets')
+    await databaseService.getCollection(env.TWEETS_COLLECTION || 'tweets')
   )
     .aggregate([], {
       maxTimeMS: 60000,
