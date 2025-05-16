@@ -1,7 +1,10 @@
+import { env } from '@/config/env'
 import { ErrorCode, MediaType, TweetAudience, TweetType } from '@/constants/enums'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import { Media } from '@/models/schemas/media'
+import Tweet from '@/models/schemas/tweet.schema'
 import databaseService from '@/services/database.services'
+import userService from '@/services/users.services'
 import WrappedError from '@/utils/error'
 import { checkSchema } from 'express-validator'
 import { isEmpty } from 'lodash'
@@ -123,16 +126,22 @@ export const getTweetDetailValidator = checkSchema({
   tweet_id: {
     in: 'params',
     custom: {
-      options: async (value: string) => {
-        if (ObjectId.isValid(value)) {
-          const result = await (
-            await databaseService.getCollection(process.env.TWEETS_COLLECTION || 'tweets')
-          ).findOne({ _id: new ObjectId(value) })
-          if (result) return true
+      options: async (value: string, req) => {
+        if (!ObjectId.isValid(value))
+          throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Tweet id sai định dạng') }
+        const result = await (
+          await databaseService.getCollection<Tweet>(env.TWEETS_COLLECTION)
+        ).findOne({ _id: new ObjectId(value) })
+        if (!result) {
+          throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Tweet id không tồn tại') }
         }
-        throw {
-          custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Tweet không khả dụng', ErrorCode.TweetInvalid)
+        if (result.audience === TweetAudience.TwitterCircle) {
+          const guest_id: string = req.req.user_id
+          const isValid = await userService.isInTwitterCircle(result.user_id, new ObjectId(guest_id))
+          if (!isValid)
+            throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Tweet này không khả dụng với bạn') }
         }
+        return true
       }
     }
   }

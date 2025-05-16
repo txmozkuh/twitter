@@ -7,7 +7,6 @@ import { ObjectId } from 'mongodb'
 class TweetService {
   async createTweet(payload: TweetRequest, user_id: ObjectId) {
     const result = await this.checkHashtags(payload.hashtags)
-    console.log(result)
     await (
       await databaseService.getCollection('tweets')
     ).insertOne(

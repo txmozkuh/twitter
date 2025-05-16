@@ -1,4 +1,9 @@
-import { createTweetController, getTweetController, getTweetListController } from '@/controllers/tweets.controllers'
+import {
+  createTweetController,
+  getTweetController,
+  getTweetListController,
+  getTweetChildrenController
+} from '@/controllers/tweets.controllers'
 import { createTweetValidator, getTweetDetailValidator } from '@/middlewares/tweet.middlewares'
 import { accessTokenValidator, validateRequest } from '@/middlewares/user.middlewares'
 import { Router } from 'express'
@@ -9,4 +14,6 @@ tweetRouter.post('/create', accessTokenValidator, createTweetValidator, validate
 tweetRouter.get('/detail/:tweet_id', accessTokenValidator, getTweetDetailValidator, validateRequest, getTweetController)
 tweetRouter.get('/', accessTokenValidator, validateRequest, getTweetListController)
 
+//Param: {number, page,tweet_type}
+tweetRouter.get('/:tweet_id/children', accessTokenValidator, validateRequest, getTweetChildrenController)
 export default tweetRouter

@@ -1,4 +1,5 @@
 import { SortOrder } from '@/constants/enums'
+import Tweet from '@/models/schemas/tweet.schema'
 import { ObjectId } from 'mongodb'
 
 export interface ErrorData {
@@ -79,4 +80,9 @@ export interface FilterDataList<T> {
   sort_by: string
   sort_order: SortOrder
   data: T[]
+}
+
+export interface TweetResponse extends Tweet {
+  like_amount: number
+  bookmark_amount: number
 }
