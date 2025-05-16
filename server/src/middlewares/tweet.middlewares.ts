@@ -139,7 +139,13 @@ export const getTweetDetailValidator = checkSchema({
           const guest_id: string = req.req.user_id
           const isValid = await userService.isInTwitterCircle(result.user_id, new ObjectId(guest_id))
           if (!isValid)
-            throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Tweet này không khả dụng với bạn') }
+            throw {
+              custom_error: new WrappedError(
+                HTTP_STATUS.BAD_REQUEST,
+                'Tweet này không khả dụng với bạn',
+                ErrorCode.TweetInvalid
+              )
+            }
         }
         return true
       }

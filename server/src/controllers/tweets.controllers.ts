@@ -93,6 +93,7 @@ export const getTweetListController = async (
   res: Response<SuccessData<FilterDataList<TweetResponse>>>,
   next: NextFunction
 ) => {
+  const user_id = req.user_id
   const collection = await databaseService.getCollection(env.TWEETS_COLLECTION)
   const post_ids = (await collection.find().limit(5).toArray()).map((item) => item._id)
   await collection.updateMany(
@@ -127,8 +128,12 @@ export const getTweetListController = async (
         },
         {
           $addFields: {
-            bookmark_amount: { $size: '$bookmarks_info' },
-            like_amount: { $size: '$likes_info' }
+            bookmark_amount: {
+              $size: '$bookmarks_info'
+            },
+            like_amount: {
+              $size: '$likes_info'
+            }
           }
         },
         {
@@ -138,7 +143,50 @@ export const getTweetListController = async (
           }
         },
         {
-          $limit: 5
+          $lookup: {
+            from: 'users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'owner',
+            pipeline: [
+              {
+                $project: {
+                  twitter_circle: 1,
+                  _id: 0
+                }
+              }
+            ]
+          }
+        },
+        {
+          $unwind: {
+            path: '$owner',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $match: {
+            $or: [
+              {
+                audience: 0
+              },
+              {
+                $and: [
+                  {
+                    audience: 1
+                  },
+                  {
+                    'owner.twitter_circle': new ObjectId(user_id)
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          $project: {
+            owner: 0
+          }
         }
       ],
       {
