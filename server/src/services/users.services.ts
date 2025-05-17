@@ -10,6 +10,7 @@ import { signToken } from '@/utils/jwt'
 import { TokenExpiredError, verify } from 'jsonwebtoken'
 import { ObjectId } from 'mongodb'
 import { env } from '@config/env'
+import { isEmpty } from 'lodash'
 class UserService {
   private signValidateToken(user_id: string, token_type: TokenType, expiresIn?: number) {
     return signToken({
@@ -122,6 +123,27 @@ class UserService {
   async createForgotPasswordToken(user_id: string) {
     const forgot_password_token = await this.signValidateToken(user_id, TokenType.ForgotPasswordToken)
     return forgot_password_token
+  }
+
+  async isInTwitterCircle(user_id: ObjectId, guest_id: ObjectId) {
+    const result = await (
+      await databaseService.getCollection<User>(env.USERS_COLLECTION)
+    )
+      .aggregate([
+        {
+          $match: {
+            _id: user_id
+          }
+        },
+        {
+          $match: {
+            twitter_circle: guest_id
+          }
+        }
+      ])
+      .toArray()
+
+    return !(result.length === 0)
   }
 }
 
