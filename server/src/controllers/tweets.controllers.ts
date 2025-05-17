@@ -187,6 +187,9 @@ export const getTweetListController = async (
           $project: {
             owner: 0
           }
+        },
+        {
+          $limit: 5
         }
       ],
       {
