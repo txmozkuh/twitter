@@ -214,7 +214,27 @@ export const getTweetListController = async (
   return
 }
 
-export const getTweetChildrenController = async (req: Request, res: Response, next: NextFunction) => {
-  res.json({ message: 'Testing' })
+export const getTweetChildrenController = async (
+  req: CustomRequest,
+  res: Response<SuccessData<Tweet> | SuccessWithoutData>,
+  next: NextFunction
+) => {
+  const { tweet_id } = req.params
+  const child_tweet = await (
+    await databaseService.getCollection(env.TWEETS_COLLECTION)
+  ).findOne<Tweet>({ parent_id: new ObjectId(tweet_id) })
+
+  if (child_tweet === null) {
+    res.json({
+      success: true,
+      message: 'Tweet này không có tweet children'
+    })
+    return
+  }
+  res.json({
+    success: true,
+    message: 'Lấy children tweet thành công',
+    data: child_tweet
+  })
   return
 }

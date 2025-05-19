@@ -152,3 +152,29 @@ export const getTweetDetailValidator = checkSchema({
     }
   }
 })
+
+export const getTweetChildrenValidator = checkSchema({
+  tweet_id: {
+    in: 'params',
+    custom: {
+      options: async (value: string) => {
+        if (!ObjectId.isValid(value)) {
+          throw {
+            custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Tweet id sai định dạng', ErrorCode.TweetInvalid)
+          }
+        }
+        const result = await (
+          await databaseService.getCollection(env.TWEETS_COLLECTION)
+        ).findOne({
+          _id: new ObjectId(value)
+        })
+        if (!result) {
+          throw {
+            custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Tweet không tồn tại', ErrorCode.TweetInvalid)
+          }
+        }
+        return true
+      }
+    }
+  }
+})
