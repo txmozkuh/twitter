@@ -87,6 +87,9 @@ class UserService {
       if (verify_token && verify_status === UserVerifyStatus.Unverified) {
         throw new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Người dùng chưa xác thực')
       }
+      if (verify_status === UserVerifyStatus.Banned) {
+        throw new WrappedError(HTTP_STATUS.FORBIDDEN, 'Người dùng đã bị cấm ')
+      }
       const { access_token, refresh_token } = await this.signAuthToken(user_id)
       this.saveRefreshToken(refresh_token, new ObjectId(user_id))
       const {

@@ -1,14 +1,18 @@
 import { env } from '@/config/env'
-import { ErrorCode, MediaType, TweetAudience, TweetType } from '@/constants/enums'
+import { ErrorCode, MediaType, TweetAudience, TweetType, UserVerifyStatus } from '@/constants/enums'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import { Media } from '@/models/schemas/media'
 import Tweet from '@/models/schemas/tweet.schema'
 import databaseService from '@/services/database.services'
 import userService from '@/services/users.services'
 import WrappedError from '@/utils/error'
+import { NextFunction, Request, RequestHandler, Response } from 'express'
 import { checkSchema } from 'express-validator'
 import { isEmpty } from 'lodash'
 import { ObjectId } from 'mongodb'
+import { ParseParams } from 'zod'
+import { ParamsDictionary } from 'express-serve-static-core'
+import User from '@/models/schemas/user.schema'
 
 export const createTweetValidator = checkSchema({
   type: {
@@ -157,7 +161,7 @@ export const getTweetChildrenValidator = checkSchema({
   tweet_id: {
     in: 'params',
     custom: {
-      options: async (value: string) => {
+      options: async (value: string, { req }) => {
         if (!ObjectId.isValid(value)) {
           throw {
             custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Tweet id sai định dạng', ErrorCode.TweetInvalid)
@@ -173,8 +177,26 @@ export const getTweetChildrenValidator = checkSchema({
             custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Tweet không tồn tại', ErrorCode.TweetInvalid)
           }
         }
+        req.tweet = result
         return true
       }
     }
   }
 })
+
+export const audienceValidator = async (req: Request, res: Response, next: NextFunction) => {
+  const user_id = (req as any).user_id as string
+  const tweet = (req as any).tweet as Tweet
+  if (tweet.audience === TweetAudience.TwitterCircle) {
+    const result = await (
+      await databaseService.getCollection(env.USERS_COLLECTION)
+    ).findOne<User>({
+      _id: new ObjectId(tweet.user_id)
+    })
+    const valid = result!.twitter_circle!.some((id) => id.toString() === user_id)
+    if (!valid || result?.verify === UserVerifyStatus.Banned) {
+      throw new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Tweet này hiện không khả dụng với bạn', ErrorCode.TweetInvalid)
+    }
+  }
+  next()
+}

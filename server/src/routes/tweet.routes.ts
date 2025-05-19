@@ -7,7 +7,8 @@ import {
 import {
   createTweetValidator,
   getTweetDetailValidator,
-  getTweetChildrenValidator
+  getTweetChildrenValidator,
+  audienceValidator
 } from '@/middlewares/tweet.middlewares'
 import { accessTokenValidator, validateRequest } from '@/middlewares/user.middlewares'
 import { Router } from 'express'
@@ -23,6 +24,7 @@ tweetRouter.get(
   '/children/:tweet_id',
   accessTokenValidator,
   getTweetChildrenValidator,
+  audienceValidator,
   validateRequest,
   getTweetChildrenController
 )
