@@ -1,5 +1,7 @@
+import { env } from '@/config/env'
 import { ErrorCode, TokenType } from '@/constants/enums'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
+import User from '@/models/schemas/user.schema'
 import databaseService from '@/services/database.services'
 import userService from '@/services/users.services'
 import { TokenPayload } from '@/types/auth.types'
@@ -382,6 +384,54 @@ export const updateProfileValidator = checkSchema(
   },
   ['body']
 )
+
+export const followUserValidator = checkSchema({
+  follow_user_id: {
+    in: 'body',
+    exists: { errorMessage: 'Không nhận được user_id' },
+    custom: {
+      options: async (value: string, { req }) => {
+        const { user_id } = req
+        if (!ObjectId.isValid(value))
+          throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Id sai định dạng') }
+        const user = await (
+          await databaseService.getCollection(env.USERS_COLLECTION)
+        ).findOne<User>({ _id: new ObjectId(value) })
+        if (!user) throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'User không tồn tại') }
+        const follow_state = await (
+          await databaseService.getCollection(env.FOLLOWERS_COLLECTION)
+        ).findOne({ user_id: new ObjectId(user_id as string), followed_user_id: new ObjectId(value) })
+        if (follow_state)
+          throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Bạn đã follow người dùng này') }
+        return true
+      }
+    }
+  }
+})
+
+export const unFollowUserValidator = checkSchema({
+  unfollow_user_id: {
+    in: 'body',
+    exists: { errorMessage: 'Không nhận được user_id' },
+    custom: {
+      options: async (value: string, { req }) => {
+        const { user_id } = req
+        if (!ObjectId.isValid(value))
+          throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Id sai định dạng') }
+        const user = await (
+          await databaseService.getCollection(env.USERS_COLLECTION)
+        ).findOne<User>({ _id: new ObjectId(value) })
+        if (!user) throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'User không tồn tại') }
+        const follow_state = await (
+          await databaseService.getCollection(env.FOLLOWERS_COLLECTION)
+        ).findOne({ user_id: new ObjectId(user_id as string), followed_user_id: new ObjectId(value) })
+        if (!follow_state)
+          throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Bạn hiện không follow người dùng này') }
+        return true
+      }
+    }
+  }
+})
 
 export const validateRequest: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req)

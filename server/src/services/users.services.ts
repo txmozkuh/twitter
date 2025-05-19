@@ -11,6 +11,7 @@ import { TokenExpiredError, verify } from 'jsonwebtoken'
 import { ObjectId } from 'mongodb'
 import { env } from '@config/env'
 import { isEmpty } from 'lodash'
+import Follower from '@/models/schemas/follower.schema'
 class UserService {
   private signValidateToken(user_id: string, token_type: TokenType, expiresIn?: number) {
     return signToken({
@@ -126,6 +127,17 @@ class UserService {
   async createForgotPasswordToken(user_id: string) {
     const forgot_password_token = await this.signValidateToken(user_id, TokenType.ForgotPasswordToken)
     return forgot_password_token
+  }
+
+  async follow(user_id: ObjectId, follow_user_id: ObjectId) {
+    await (
+      await databaseService.getCollection(env.FOLLOWERS_COLLECTION)
+    ).insertOne(new Follower({ user_id, followed_user_id: follow_user_id }))
+  }
+  async unFollow(user_id: ObjectId, unfollow_user_id: ObjectId) {
+    await (
+      await databaseService.getCollection(env.FOLLOWERS_COLLECTION)
+    ).deleteOne({ user_id, followed_user_id: unfollow_user_id })
   }
 
   async isInTwitterCircle(user_id: ObjectId, guest_id: ObjectId) {

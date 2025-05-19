@@ -67,6 +67,8 @@ export interface GetProfileResponse {
   username?: string
   avatar?: string
   cover_photo?: string
+  follows: number
+  followers: number
 }
 
 export interface UploadImageResponse {

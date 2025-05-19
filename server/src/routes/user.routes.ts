@@ -11,7 +11,9 @@ import {
   getProfileController,
   updateAvatarController,
   updateCoverPhotoController,
-  deleteCoverPhotoController
+  deleteCoverPhotoController,
+  followUserController,
+  unFollowUserController
 } from '@/controllers/users.controllers'
 import {
   loginValidator,
@@ -23,7 +25,9 @@ import {
   forgotPasswordValidator,
   resetPasswordValidator,
   accessTokenValidator,
-  updateProfileValidator
+  updateProfileValidator,
+  followUserValidator,
+  unFollowUserValidator
 } from '@middlewares/user.middlewares'
 
 const userRouter = Router()
@@ -41,4 +45,8 @@ userRouter.patch('/update', accessTokenValidator, updateProfileValidator, valida
 userRouter.post('/update-avatar', accessTokenValidator, validateRequest, updateAvatarController)
 userRouter.post('/update-cover', accessTokenValidator, validateRequest, updateCoverPhotoController)
 userRouter.patch('/delete-cover-photo', accessTokenValidator, validateRequest, deleteCoverPhotoController)
+
+userRouter.post('/follow', accessTokenValidator, followUserValidator, validateRequest, followUserController)
+userRouter.delete('/unfollow', accessTokenValidator, unFollowUserValidator, validateRequest, unFollowUserController)
+
 export default userRouter

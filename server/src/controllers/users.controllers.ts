@@ -21,6 +21,7 @@ import { CustomRequest, RegisterRequest } from '@/types/request'
 import { ErrorCode, TokenType, UserVerifyStatus } from '@/constants/enums'
 import mediaService from '@/services/medias.services'
 import { getPublicId } from '@/utils/file'
+import { env } from '@/config/env'
 
 export const loginController = async (req: Request, res: Response<SuccessData<LoginResponse>>, next: NextFunction) => {
   const { email, password } = req.body
@@ -201,7 +202,28 @@ export const getProfileController: RequestHandler = async (
     if (!user) {
       throw new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không hợp lệ')
     }
-
+    const follows = await (
+      await databaseService.getCollection(env.FOLLOWERS_COLLECTION)
+    )
+      .aggregate([
+        {
+          $match: {
+            user_id: new ObjectId(user_id)
+          }
+        }
+      ])
+      .toArray()
+    const followers = await (
+      await databaseService.getCollection(env.FOLLOWERS_COLLECTION)
+    )
+      .aggregate([
+        {
+          $match: {
+            follow_user_id: new ObjectId(user_id)
+          }
+        }
+      ])
+      .toArray()
     res.status(200).json({
       success: true,
       message: 'Lấy thông tin thành công',
@@ -214,7 +236,9 @@ export const getProfileController: RequestHandler = async (
         website: user.website,
         username: user.username,
         avatar: user.avatar,
-        cover_photo: user.cover_photo
+        cover_photo: user.cover_photo,
+        follows: follows.length,
+        followers: followers.length
       }
     })
     return
@@ -399,6 +423,31 @@ export const deleteCoverPhotoController = async (
     res.status(200).json({
       success: true,
       message: 'Xóa ảnh bìa thành công'
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const followUserController = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user_id = req.user_id
+  const { follow_user_id } = req.body
+  try {
+    await userService.follow(new ObjectId(user_id), new ObjectId(follow_user_id as string))
+    res.json({
+      message: 'Follow người dùng thành công '
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+export const unFollowUserController = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user_id = req.user_id
+  const { unfollow_user_id } = req.body
+  try {
+    await userService.unFollow(new ObjectId(user_id), new ObjectId(unfollow_user_id as string))
+    res.json({
+      message: 'Unfollow người dùng thành công '
     })
   } catch (error) {
     next(error)

@@ -130,7 +130,7 @@ export const getTweetDetailValidator = checkSchema({
   tweet_id: {
     in: 'params',
     custom: {
-      options: async (value: string, req) => {
+      options: async (value: string, { req }) => {
         if (!ObjectId.isValid(value))
           throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Tweet id sai định dạng') }
         const result = await (
@@ -139,18 +139,7 @@ export const getTweetDetailValidator = checkSchema({
         if (!result) {
           throw { custom_error: new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Tweet id không tồn tại') }
         }
-        if (result.audience === TweetAudience.TwitterCircle) {
-          const guest_id: string = req.req.user_id
-          const isValid = await userService.isInTwitterCircle(result.user_id, new ObjectId(guest_id))
-          if (!isValid)
-            throw {
-              custom_error: new WrappedError(
-                HTTP_STATUS.BAD_REQUEST,
-                'Tweet này không khả dụng với bạn',
-                ErrorCode.TweetInvalid
-              )
-            }
-        }
+        req.tweet = result
         return true
       }
     }
