@@ -2,7 +2,8 @@ import {
   createTweetController,
   getTweetController,
   getTweetListController,
-  getTweetChildrenController
+  getTweetChildrenController,
+  getNewfeedController
 } from '@/controllers/tweets.controllers'
 import {
   createTweetValidator,
@@ -37,4 +38,7 @@ tweetRouter.get(
   validateRequest,
   getTweetChildrenController
 )
+
+tweetRouter.get('/newfeed', accessTokenValidator, validateRequest, getNewfeedController)
+
 export default tweetRouter

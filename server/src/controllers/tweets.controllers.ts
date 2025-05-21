@@ -238,3 +238,13 @@ export const getTweetChildrenController = async (
   })
   return
 }
+
+export const getNewfeedController = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  try {
+    const { user_id } = req
+    const result = (await tweetService.getNewfeed(new ObjectId(user_id as string))) as Tweet[]
+    res.json({ message: 'Lấy newfeed thành công', data: result })
+  } catch (error) {
+    next(error)
+  }
+}
