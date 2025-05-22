@@ -1,5 +1,5 @@
 import { env } from '@/config/env'
-import { SortOrder } from '@/constants/enums'
+import { SortOrder, TweetType } from '@/constants/enums'
 import Hashtag from '@/models/schemas/hashtag.schema'
 import Tweet from '@/models/schemas/tweet.schema'
 import databaseService from '@/services/database.services'
@@ -103,10 +103,6 @@ class TweetService {
       }
     ]
   }
-
-  private getComment(parent_id: ObjectId) {
-    //Nếu
-  }
   private getParentTweet(): PipelineStage[] {
     return [
       {
@@ -185,6 +181,18 @@ class TweetService {
     ]
   }
 
+  private getComments(tweet_id: ObjectId): PipelineStage[] {
+    //các tweet con có type là COMMENT
+    return [
+      {
+        $match: {
+          parent_id: tweet_id,
+          type: TweetType.Comment
+        }
+      }
+    ]
+  }
+
   private sort(order: SortOrder = SortOrder.Asc): PipelineStage.Sort {
     return { $sort: { created_at: order } }
   }
@@ -201,8 +209,23 @@ class TweetService {
     return result
   }
 
-  async getComments() {
-    //có type là COMMENT
+  async getTweetDetail(tweet_id: ObjectId) {
+    const cll = await databaseService.getCollection(env.TWEETS_COLLECTION)
+    const tweet = await cll
+      .aggregate([
+        {
+          $match: {
+            _id: tweet_id
+          }
+        },
+        ...this.getParentTweet()
+      ])
+      .toArray()
+    const comments = await (await databaseService.getCollection(env.TWEETS_COLLECTION))
+      .aggregate([...this.getComments(tweet_id)])
+      .toArray()
+
+    return { tweet, comments }
   }
 }
 

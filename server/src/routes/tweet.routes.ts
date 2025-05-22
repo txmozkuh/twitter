@@ -3,7 +3,8 @@ import {
   getTweetController,
   getTweetListController,
   getTweetChildrenController,
-  getNewfeedController
+  getNewfeedController,
+  getTweetDetailController
 } from '@/controllers/tweets.controllers'
 import {
   createTweetValidator,
@@ -18,14 +19,14 @@ const tweetRouter = Router()
 
 tweetRouter.post('/create', accessTokenValidator, createTweetValidator, validateRequest, createTweetController)
 
-tweetRouter.get(
-  '/detail/:tweet_id',
-  accessTokenValidator,
-  getTweetDetailValidator,
-  audienceValidator,
-  validateRequest,
-  getTweetController
-)
+// tweetRouter.get(
+//   '/detail/:tweet_id',
+//   accessTokenValidator,
+//   getTweetDetailValidator,
+//   audienceValidator,
+//   validateRequest,
+//   getTweetController
+// )
 
 tweetRouter.get('/', accessTokenValidator, validateRequest, getTweetListController)
 
@@ -40,5 +41,12 @@ tweetRouter.get(
 )
 
 tweetRouter.get('/newfeed', accessTokenValidator, validateRequest, getNewfeedController)
-
+tweetRouter.get(
+  '/detail/:tweet_id',
+  accessTokenValidator,
+  getTweetDetailValidator,
+  audienceValidator,
+  validateRequest,
+  getTweetDetailController
+)
 export default tweetRouter

@@ -248,3 +248,17 @@ export const getNewfeedController = async (req: CustomRequest, res: Response, ne
     next(error)
   }
 }
+
+export const getTweetDetailController = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  try {
+    const { tweet_id } = req.params
+    const { tweet, comments } = await tweetService.getTweetDetail(new ObjectId(tweet_id as string))
+    res.json({
+      success: true,
+      message: 'Lấy thông tin chi tiết tweet thành công',
+      data: { tweet, comments }
+    })
+  } catch (error) {
+    next(error)
+  }
+}
