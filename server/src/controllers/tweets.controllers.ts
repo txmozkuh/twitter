@@ -108,7 +108,7 @@ export const getTweetListController = async (
   const result = (await (
     await databaseService.getCollection(env.TWEETS_COLLECTION || 'tweets')
   )
-    .aggregate(
+    .aggregate<TweetResponse>(
       [
         {
           $lookup: {
@@ -197,7 +197,7 @@ export const getTweetListController = async (
         allowDiskUse: true
       }
     )
-    .toArray()) as TweetResponse[]
+    .toArray())
 
   res.json({
     success: true,
