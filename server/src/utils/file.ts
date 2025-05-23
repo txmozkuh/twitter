@@ -1,9 +1,11 @@
 import { Request } from 'express'
 import fs from 'fs'
-import formidable, { File } from 'formidable'
+import formidable, { File, errors as formidableErrors } from 'formidable'
 import path from 'path'
 import WrappedError from '@/utils/error'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
+import { error } from 'console'
+import { reject } from 'lodash'
 
 export const initFolder = () => {
   if (!fs.existsSync(path.resolve('uploads'))) {
@@ -56,9 +58,15 @@ export const parseVideo = async (req: Request) => {
       return isVideo
     }
   })
+
   return new Promise<File>((resolve, reject) => {
     form.parse(req, (err, fields, files) => {
-      if (err) reject(err)
+      if (err) {
+        if (err.code === 1009 || err.message.includes('maxTotalFileSize')) {
+          return reject(new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Vượt quá kích thước file tối đa 100MB'))
+        }
+        reject(err)
+      }
       if (!files.video) {
         return reject(new WrappedError(HTTP_STATUS.BAD_REQUEST, 'Không tìm thấy file'))
       }

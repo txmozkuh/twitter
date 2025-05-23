@@ -34,7 +34,6 @@ class MediaService {
 
   async handleUploadVideo(req: Request, uploadOptions: UploadApiOptions) {
     const videoFile = await parseVideo(req)
-    // console.log(videoFile.filepath)
     const result = await cloudinary.uploader.upload(videoFile.filepath, {
       resource_type: 'video',
       folder: 'test',
