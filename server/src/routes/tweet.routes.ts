@@ -1,6 +1,6 @@
 import {
   createTweetController,
-  getTweetController,
+  // getTweetController,
   getTweetListController,
   getTweetChildrenController,
   getNewfeedController,
@@ -17,6 +17,7 @@ import { Router } from 'express'
 
 const tweetRouter = Router()
 
+//Tạo tweet:
 tweetRouter.post('/create', accessTokenValidator, createTweetValidator, validateRequest, createTweetController)
 
 // tweetRouter.get(
@@ -28,6 +29,7 @@ tweetRouter.post('/create', accessTokenValidator, createTweetValidator, validate
 //   getTweetController
 // )
 
+//Lấy danh sách tweet
 tweetRouter.get('/', accessTokenValidator, validateRequest, getTweetListController)
 
 //Param: {number, page,tweet_type}
@@ -41,6 +43,7 @@ tweetRouter.get(
 )
 
 tweetRouter.get('/newfeed', accessTokenValidator, validateRequest, getNewfeedController)
+
 tweetRouter.get(
   '/detail/:tweet_id',
   accessTokenValidator,

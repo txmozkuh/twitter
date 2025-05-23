@@ -22,71 +22,71 @@ export const createTweetController = async (req: CustomRequest, res: Response, n
   return
 }
 
-export const getTweetController = async (
-  req: CustomRequest,
-  res: Response<SuccessData<TweetResponse>>,
-  next: NextFunction
-) => {
-  const user_id = req.user_id
-  const { tweet_id } = req.params
-  //updateView
-  await (
-    await databaseService.getCollection(env.TWEETS_COLLECTION || 'tweets')
-  ).findOneAndUpdate(
-    { _id: new ObjectId(tweet_id as string) },
-    {
-      $inc: { views: 1 }
-    }
-  )
+// export const getTweetController = async (
+//   req: CustomRequest,
+//   res: Response<SuccessData<TweetResponse>>,
+//   next: NextFunction
+// ) => {
+//   const user_id = req.user_id
+//   const { tweet_id } = req.params
+//   //updateView
+//   await (
+//     await databaseService.getCollection(env.TWEETS_COLLECTION || 'tweets')
+//   ).findOneAndUpdate(
+//     { _id: new ObjectId(tweet_id as string) },
+//     {
+//       $inc: { views: 1 }
+//     }
+//   )
 
-  const result = (await (
-    await databaseService.getCollection(env.TWEETS_COLLECTION)
-  )
-    .aggregate([
-      {
-        $match: {
-          _id: new ObjectId(tweet_id)
-        }
-      },
-      {
-        $lookup: {
-          from: 'bookmarks',
-          localField: '_id',
-          foreignField: 'tweet_id',
-          as: 'bookmarks_info'
-        }
-      },
-      {
-        $lookup: {
-          from: 'likes',
-          localField: '_id',
-          foreignField: 'tweet_id',
-          as: 'likes_info'
-        }
-      },
-      {
-        $addFields: {
-          bookmark_amount: { $size: '$bookmarks_info' },
-          like_amount: { $size: '$likes_info' }
-        }
-      },
-      {
-        $project: {
-          bookmarks_info: 0,
-          likes_info: 0
-        }
-      }
-    ])
-    .toArray()) as TweetResponse[]
-  const data = result[0]
+//   const result = (await (
+//     await databaseService.getCollection(env.TWEETS_COLLECTION)
+//   )
+//     .aggregate([
+//       {
+//         $match: {
+//           _id: new ObjectId(tweet_id)
+//         }
+//       },
+//       {
+//         $lookup: {
+//           from: 'bookmarks',
+//           localField: '_id',
+//           foreignField: 'tweet_id',
+//           as: 'bookmarks_info'
+//         }
+//       },
+//       {
+//         $lookup: {
+//           from: 'likes',
+//           localField: '_id',
+//           foreignField: 'tweet_id',
+//           as: 'likes_info'
+//         }
+//       },
+//       {
+//         $addFields: {
+//           bookmark_amount: { $size: '$bookmarks_info' },
+//           like_amount: { $size: '$likes_info' }
+//         }
+//       },
+//       {
+//         $project: {
+//           bookmarks_info: 0,
+//           likes_info: 0
+//         }
+//       }
+//     ])
+//     .toArray()) as TweetResponse[]
+//   const data = result[0]
 
-  res.json({
-    success: true,
-    message: 'Lấy detail tweet thành công',
-    data
-  })
-  return
-}
+//   res.json({
+//     success: true,
+//     message: 'Lấy detail tweet thành công',
+//     data
+//   })
+//   return
+// }
 
 export const getTweetListController = async (
   req: CustomRequest,

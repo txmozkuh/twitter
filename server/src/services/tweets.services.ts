@@ -103,6 +103,7 @@ class TweetService {
       }
     ]
   }
+
   private getParentTweet(): PipelineStage[] {
     return [
       {
@@ -193,8 +194,60 @@ class TweetService {
     ]
   }
 
-  private sort(order: SortOrder = SortOrder.Asc): PipelineStage.Sort {
-    return { $sort: { created_at: order } }
+  private countBookmark(tweet_id: ObjectId): PipelineStage[] {
+    return [
+      {
+        $match: {
+          _id: tweet_id
+        }
+      },
+      {
+        $lookup: {
+          from: 'bookmarks',
+          localField: '_id',
+          foreignField: 'tweet_id',
+          as: 'bookmarks_info'
+        }
+      },
+      {
+        $addFields: {
+          bookmark_amount: { $size: '$bookmarks_info' }
+        }
+      },
+      {
+        $project: {
+          bookmarks_info: 0
+        }
+      }
+    ]
+  }
+
+  private countLike(tweet_id: ObjectId): PipelineStage[] {
+    return [
+      {
+        $match: {
+          _id: tweet_id
+        }
+      },
+      {
+        $lookup: {
+          from: 'likes',
+          localField: '_id',
+          foreignField: 'tweet_id',
+          as: 'likes_info'
+        }
+      },
+      {
+        $addFields: {
+          like_amount: { $size: '$likes_info' }
+        }
+      },
+      {
+        $project: {
+          likes_info: 0
+        }
+      }
+    ]
   }
 
   async getNewfeed(user_id: ObjectId) {
@@ -212,19 +265,23 @@ class TweetService {
   async getTweetDetail(tweet_id: ObjectId) {
     const cll = await databaseService.getCollection(env.TWEETS_COLLECTION)
     const tweet = await cll
-      .aggregate([
+      .aggregate<Tweet>([
         {
           $match: {
             _id: tweet_id
           }
         },
+        ...this.countBookmark(tweet_id),
+        ...this.countLike(tweet_id),
         ...this.getParentTweet()
       ])
       .toArray()
     const comments = await (await databaseService.getCollection(env.TWEETS_COLLECTION))
-      .aggregate([...this.getComments(tweet_id)])
+      .aggregate<Tweet>([...this.getComments(tweet_id)])
       .toArray()
-
+    console.log(tweet)
+    this.increaseView(comments)
+    this.increaseView(tweet)
     return { tweet, comments }
   }
 }

@@ -1,9 +1,11 @@
-import { handleUploadImage } from '@/utils/file'
+import { handleUploadImage, parseVideo } from '@/utils/file'
 import { Request } from 'express'
 import sharp from 'sharp'
 import fs from 'fs'
 import cloudinary from '@/utils/cloudinary'
 import { UploadApiOptions } from 'cloudinary'
+import { error } from 'console'
+import { result } from 'lodash'
 
 class MediaService {
   async handleUploadImage(req: Request, uploadOptions: UploadApiOptions) {
@@ -28,6 +30,17 @@ class MediaService {
     } catch (error) {
       console.error(error)
     }
+  }
+
+  async handleUploadVideo(req: Request, uploadOptions: UploadApiOptions) {
+    const videoFile = await parseVideo(req)
+    // console.log(videoFile.filepath)
+    const result = await cloudinary.uploader.upload(videoFile.filepath, {
+      resource_type: 'video',
+      folder: 'test',
+      chunk_size: 50 * 1024 * 1024
+    })
+    return result.url
   }
 }
 
