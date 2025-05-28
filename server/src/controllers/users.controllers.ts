@@ -18,10 +18,34 @@ import {
   UploadImageResponse
 } from '@/types/response'
 import { CustomRequest, RegisterRequest } from '@/types/request'
-import { ErrorCode, TokenType, UserVerifyStatus } from '@/constants/enums'
+import { ErrorCode, LoginFrom, TokenType, UserVerifyStatus } from '@/constants/enums'
 import mediaService from '@/services/medias.services'
 import { getPublicId } from '@/utils/file'
 import { env } from '@/config/env'
+
+//flow : google oauth -> check user -> existed -> login -> tra ve token
+//                                  -> khong existed -> register -> tra ve token
+export const googleAuthController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const google_user = req.user as UserType
+    const user = await userService.login({ email: google_user.email, password: '123' }, LoginFrom.GoogleLogin)
+    // const token = generateToken(user._id)
+    // Redirect to frontend with token
+    // res.redirect(`${env.CLIENT_URL}/auth/success?token=${user.access_token}}`)
+    res.json({
+      success: true,
+      message: 'Đăng nhập thành công',
+      data: {
+        ...user,
+        access_token: `Bearer ${user.access_token}`,
+        refresh_token: `Bearer ${user.refresh_token}`
+      }
+    })
+  } catch (error) {
+    res.redirect(`${env.CLIENT_URL}/auth/error`)
+    console.log(error)
+  }
+}
 
 export const loginController = async (req: Request, res: Response<SuccessData<LoginResponse>>, next: NextFunction) => {
   const { email, password } = req.body

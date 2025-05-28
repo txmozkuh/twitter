@@ -4,6 +4,7 @@ dotenv.config()
 
 const envSchema = z.object({
   PORT: z.string(),
+  CLIENT_URL: z.string(),
   MONGO_URI: z.string().url(),
   DB_NAME: z.string().min(1),
   USERS_COLLECTION: z.string().min(1),
@@ -22,10 +23,14 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string().min(1),
   CLOUDINARY_API_SECRET: z.string().min(1),
   //
+  GOOGLE_CLIENT_ID: z.string().min(1),
+  GOOGLE_CLIENT_SECRET: z.string().min(1),
+  //
   AWS_ACCESS_KEY_ID: z.string().min(1),
   AWS_SECRET_ACCESS_KEY: z.string().min(1),
   AWS_REGION: z.string().min(1),
   SES_FROM_ADDRESS: z.string().min(1)
+  //
 })
 
 const parseEnv = envSchema.safeParse(process.env)

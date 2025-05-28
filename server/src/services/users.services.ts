@@ -1,4 +1,4 @@
-import { ErrorCode, TokenType, UserVerifyStatus } from '@/constants/enums'
+import { ErrorCode, LoginFrom, TokenType, UserVerifyStatus } from '@/constants/enums'
 import { HTTP_STATUS } from '@/constants/httpStatusCode'
 import RefreshToken from '@/models/schemas/refreshToken.schema'
 import User, { UserType } from '@/models/schemas/user.schema'
@@ -63,23 +63,38 @@ class UserService {
       throw new WrappedError(500, 'Không lưu được refresh token')
     }
   }
-  async register(payload: RegisterRequest) {
+  async register(payload: RegisterRequest, from: LoginFrom = LoginFrom.NormalLogin) {
     const _id = new ObjectId()
-    const email_verify_token = await this.signValidateToken(_id.toString(), TokenType.EmailVerifyToken)
+
+    const email_verify_token =
+      from === LoginFrom.GoogleLogin ? '' : await this.signValidateToken(_id.toString(), TokenType.EmailVerifyToken)
+
     const { name, email, password, date_of_birth } = payload
     const hash_password = hashPassword(password)
     await (
       await databaseService.getCollection('users')
-    ).insertOne(new User({ _id, name, email, password: hash_password, date_of_birth, email_verify_token }))
+    ).insertOne(
+      new User({
+        _id,
+        name,
+        email,
+        password: hash_password,
+        verify: from === LoginFrom.GoogleLogin ? 1 : 0,
+        date_of_birth,
+        email_verify_token
+      })
+    )
     return { email_verify_token }
   }
 
-  async login(payload: LoginRequest) {
+  async login(payload: LoginRequest, loginFrom: LoginFrom = LoginFrom.NormalLogin) {
     const { email, password } = payload
-
-    const result = (await (
-      await databaseService.getCollection('users')
-    ).findOne({ email, password })) as UserType | null
+    let result = null
+    if (loginFrom === LoginFrom.GoogleLogin) {
+      result = (await (await databaseService.getCollection('users')).findOne({ email })) as UserType | null
+    } else {
+      result = (await (await databaseService.getCollection('users')).findOne({ email, password })) as UserType | null
+    }
 
     if (result) {
       const user_id = result._id!.toString()

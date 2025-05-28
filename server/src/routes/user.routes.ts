@@ -13,7 +13,8 @@ import {
   updateCoverPhotoController,
   deleteCoverPhotoController,
   followUserController,
-  unFollowUserController
+  unFollowUserController,
+  googleAuthController
 } from '@/controllers/users.controllers'
 import {
   loginValidator,
@@ -29,8 +30,18 @@ import {
   followUserValidator,
   unFollowUserValidator
 } from '@middlewares/user.middlewares'
+import passport from 'passport'
+import { env } from '@/config/env'
 
 const userRouter = Router()
+
+userRouter.get(
+  '/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email']
+  })
+)
+userRouter.get('/google/callback', passport.authenticate('google', { session: false }), googleAuthController)
 
 userRouter.post('/login', loginValidator, validateRequest, loginController)
 userRouter.post('/register', registerValidator, validateRequest, registerController)

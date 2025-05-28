@@ -5,12 +5,14 @@ import { errorHandler } from '@/middlewares/errorHandler'
 import { env } from './config/env'
 import { getPublicId, initFolder } from '@/utils/file'
 import { sendVerifyEmail } from '@/utils/email'
+import './config/passport'
 import databaseService from '@/services/database.services'
 import userRouter from '@routes/user.routes'
 import tweetRouter from '@/routes/tweet.routes'
 import mediaRouter from '@/routes/media.routes'
 import bookmarkRouter from '@/routes/bookmark.routes'
 import likeRouter from './routes/like.routes'
+import passport from 'passport'
 
 initFolder()
 
@@ -32,6 +34,8 @@ app.use(
     credentials: true
   })
 )
+
+app.use(passport.initialize())
 
 app.use('/users', userRouter)
 app.use('/tweets', tweetRouter)
