@@ -252,6 +252,7 @@ export const getProfileController: RequestHandler = async (
       success: true,
       message: 'Lấy thông tin thành công',
       data: {
+        _id: user._id!.toString(),
         name: user.name,
         email: user.email,
         date_of_birth: user.date_of_birth,

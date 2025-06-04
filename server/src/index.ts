@@ -13,7 +13,9 @@ import mediaRouter from '@/routes/media.routes'
 import bookmarkRouter from '@/routes/bookmark.routes'
 import likeRouter from './routes/like.routes'
 import passport from 'passport'
-
+import conversationRouter from './routes/conversation.routes'
+import { serverSocket } from './config/socket'
+import http from 'http'
 initFolder()
 
 databaseService
@@ -42,9 +44,11 @@ app.use('/tweets', tweetRouter)
 app.use('/medias', mediaRouter)
 app.use('/bookmarks', bookmarkRouter)
 app.use('/likes', likeRouter)
-
+app.use('/conversations', conversationRouter)
 app.use(errorHandler)
 
-app.listen(PORT, () => {
+const httpServer = http.createServer(app)
+serverSocket(httpServer)
+httpServer.listen(PORT, () => {
   console.log(`⚙️  Server is running at port: ${PORT} \n ---------------------------------`)
 })

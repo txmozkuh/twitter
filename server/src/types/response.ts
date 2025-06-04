@@ -58,6 +58,7 @@ export interface refreshTokenResponse {
 }
 
 export interface GetProfileResponse {
+  _id: string
   name: string
   email: string
   date_of_birth: Date
@@ -87,4 +88,16 @@ export interface FilterDataList<T> {
 export interface TweetResponse extends Tweet {
   like_amount: number
   bookmark_amount: number
+}
+
+export interface ChatListResponse {
+  latestMessage: {
+    content: string
+    timestamp: string
+  }
+  user_info: {
+    name: string
+    username: string
+    avatar: string
+  }
 }

@@ -10,11 +10,13 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.2",
     "@types/formidable": "^3.4.5",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/lodash": "^4.17.16",
+    "@types/node": "^22.15.24",
+    "@types/socket.io": "^3.0.2",
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.3",
@@ -24,7 +26,7 @@
     "rimraf": "^6.0.1",
     "tsc-alias": "^1.8.11",
     "tsx": "^4.19.3",
-    "typescript": "^5.8.2",
+    "typescript": "^5.8.3",
     "typescript-eslint": "^8.26.1"
   },
   "dependencies": {
@@ -34,18 +36,19 @@
     "cloudinary": "^2.6.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2",
+    "express": "4",
     "express-async-errors": "^3.1.1",
     "express-validator": "^7.2.1",
     "formidable": "^3.5.3",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
-    "mongodb": "^6.14.2",
+    "mongodb": "^6.16.0",
     "mongoose": "^8.12.1",
     "multer": "^1.4.5-lts.2",
     "multer-storage-cloudinary": "^4.0.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
-    "sharp": "^0.34.1"
+    "sharp": "^0.34.1",
+    "socket.io": "^4.8.1"
   }
 }

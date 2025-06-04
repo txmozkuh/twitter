@@ -14,6 +14,7 @@ const envSchema = z.object({
   BOOKMARKS_COLLECTION: z.string().min(1),
   LIKES_COLLECTION: z.string().min(1),
   HASHTAGS_COLLECTION: z.string().min(1),
+  CONVERSATIONS_COLLECTION: z.string().min(1),
   //
   JWT_PRIVATE_KEY: z.string().min(1),
   ACCESS_TOKEN_EXPIRE_TIME: z.string().min(1),
