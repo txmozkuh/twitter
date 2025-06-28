@@ -11,6 +11,7 @@ const conversationRouter = Router()
 
 //Lấy danh sách chat với tin nhắn gần nhất
 conversationRouter.get('/message', accessTokenValidator, validateRequest, getChatListController)
+
 //Lấy danh sách chat của 2 người
 conversationRouter.get(
   '/message/detail/:user_id',
@@ -19,7 +20,8 @@ conversationRouter.get(
   validateRequest,
   getChatDetailController
 )
+
 //Gửi tin nhắn,lưu vào db
-conversationRouter.post('/send', accessTokenValidator, validateRequest, sendMessageController)
+conversationRouter.post('/send-message', accessTokenValidator, validateRequest, sendMessageController)
 
 export default conversationRouter

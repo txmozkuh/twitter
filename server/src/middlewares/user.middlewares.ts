@@ -198,7 +198,7 @@ export const refreshTokenValidator = checkSchema({
 
 export const verifyTokenValidator = checkSchema({
   email_verify_token: {
-    in: 'body',
+    in: 'query',
     isString: { errorMessage: 'Token phải là chuỗi' },
     custom: {
       options: (value) => {

@@ -4,10 +4,13 @@ type SendEmailCommandParams = {
   fromAddress: string
   toAddresses: string | string[]
   ccAddresses?: string | string[]
-  body: string
+  url: string
+  user: string
   subject: string
   replyToAddresses?: string | string[]
 }
+
+// const template = await render(<EmailTemplate url='...' />)
 
 const sesClient = new SESClient({
   region: process.env.AWS_REGION,
@@ -21,7 +24,8 @@ const createSendEmailCommand = ({
   fromAddress,
   toAddresses,
   ccAddresses = [],
-  body,
+  user,
+  url,
   subject,
   replyToAddresses = []
 }: SendEmailCommandParams) => {
@@ -32,17 +36,16 @@ const createSendEmailCommand = ({
       ToAddresses: toAddresses instanceof Array ? toAddresses : [toAddresses]
     },
     Message: {
-      /* required */
+      Subject: {
+        Charset: 'UTF-8',
+        Data: subject
+      } /* required */,
       Body: {
         /* required */
         Html: {
           Charset: 'UTF-8',
-          Data: body
+          Data: `Hello <b>${user}</b>,<br/> <a href='${url}'>Click here</a> to verify your email <br/> Thank you for joined us!  `
         }
-      },
-      Subject: {
-        Charset: 'UTF-8',
-        Data: subject
       }
     },
     Source: fromAddress,
@@ -50,18 +53,18 @@ const createSendEmailCommand = ({
   })
 }
 
-export const sendVerifyEmail = async (toAddress: string[] | string, subject: string, body: string) => {
+export const sendVerifyEmail = async (toAddress: string[] | string, subject: string, user: string, url: string) => {
   const sendEmailCommand = createSendEmailCommand({
     fromAddress: process.env.SES_FROM_ADDRESS!,
     toAddresses: toAddress,
-    body,
+    user,
+    url,
     subject
   })
-
   try {
     return await sesClient.send(sendEmailCommand)
   } catch (e) {
-    console.error('Failed to send email.')
+    console.error('Failed to send email.', e)
     return e
   }
 }

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "jsx": "react-jsx",
     "module": "NodeNext", // Quy định output module được sử dụng
     "moduleResolution": "NodeNext",
     "target": "ES2023", // Target output cho code

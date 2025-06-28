@@ -1,4 +1,4 @@
-import { Request, Response, Router } from 'express'
+import { NextFunction, Request, Response, Router } from 'express'
 import {
   registerController,
   loginController,
@@ -32,6 +32,7 @@ import {
 } from '@middlewares/user.middlewares'
 import passport from 'passport'
 import { env } from '@/config/env'
+import { sendVerifyEmail } from '@/utils/email'
 
 const userRouter = Router()
 
@@ -41,13 +42,17 @@ userRouter.get(
     scope: ['profile', 'email']
   })
 )
+userRouter.post('/send-email', (req: Request, res: Response, next: NextFunction) => {
+  next()
+})
+
 userRouter.get('/google/callback', passport.authenticate('google', { session: false }), googleAuthController)
 
 userRouter.post('/login', loginValidator, validateRequest, loginController)
 userRouter.post('/register', registerValidator, validateRequest, registerController)
 userRouter.post('/logout', logoutValidator, validateRequest, logoutController)
 userRouter.post('/refresh-token', refreshTokenValidator, validateRequest, refreshTokenController)
-userRouter.post('/verify-email', verifyTokenValidator, validateRequest, verifyTokenController)
+userRouter.get('/verify-email', verifyTokenValidator, validateRequest, verifyTokenController)
 userRouter.post('/forgot-password', forgotPasswordValidator, validateRequest, forgotPasswordController)
 userRouter.post('/reset-password', resetPasswordValidator, validateRequest, resetPasswordController)
 

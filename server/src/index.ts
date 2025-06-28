@@ -1,10 +1,9 @@
 import 'express-async-errors'
-import express from 'express'
+import express, { NextFunction } from 'express'
 import cors from 'cors'
 import { errorHandler } from '@/middlewares/errorHandler'
 import { env } from './config/env'
 import { getPublicId, initFolder } from '@/utils/file'
-import { sendVerifyEmail } from '@/utils/email'
 import './config/passport'
 import databaseService from '@/services/database.services'
 import userRouter from '@routes/user.routes'
@@ -16,6 +15,8 @@ import passport from 'passport'
 import conversationRouter from './routes/conversation.routes'
 import { serverSocket } from './config/socket'
 import http from 'http'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
 initFolder()
 
 databaseService
@@ -29,6 +30,15 @@ const app = express()
 const PORT = env.PORT || 3000
 
 app.use(cors())
+app.use(helmet())
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false
+})
+
+app.use(limiter)
 app.use(express.json())
 app.use(
   cors({
@@ -45,6 +55,7 @@ app.use('/medias', mediaRouter)
 app.use('/bookmarks', bookmarkRouter)
 app.use('/likes', likeRouter)
 app.use('/conversations', conversationRouter)
+
 app.use(errorHandler)
 
 const httpServer = http.createServer(app)

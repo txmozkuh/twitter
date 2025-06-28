@@ -36,3 +36,10 @@ export interface BookmarkRequest {
 export interface LikeRequest {
   tweet_id: string
 }
+
+export interface MessageRequest {
+  from: string
+  to: string
+  content: string
+  timestamp: string
+}

@@ -1,5 +1,7 @@
 import { Server, Socket } from 'socket.io'
 import { Server as HTTPServer } from 'http'
+import databaseService from '@/services/database.services'
+import { env } from './env'
 
 const userSockets = new Map<string, string>()
 
@@ -19,16 +21,16 @@ export const serverSocket = (httpServer: HTTPServer) => {
       console.log(`User ${userId} registered with socket ${socket.id}`)
     })
 
-    socket.on('private message', async ({ from, to, text }) => {
+    socket.on('private message', async ({ from, to, content }) => {
       const message = {
         from,
         to,
-        text,
+        content,
         timestamp: new Date()
       }
-      console.log(message)
       // Optional: Save message to MongoDB here
       // await saveMessageToDB(message);
+
       const targetSocketId = userSockets.get(to)
       if (targetSocketId) {
         io.to(targetSocketId).emit('private message', message)

@@ -2,8 +2,8 @@ import { env } from '@/config/env'
 import { serverSocket } from '@/config/socket'
 import Conversation from '@/models/schemas/conversation.schema'
 import databaseService from '@/services/database.services'
-import { CustomRequest } from '@/types/request'
-import { ChatListResponse, SuccessData } from '@/types/response'
+import { CustomRequest, MessageRequest } from '@/types/request'
+import { ChatListResponse, SuccessData, SuccessWithoutData } from '@/types/response'
 import { NextFunction, Request, Response } from 'express'
 import { ObjectId } from 'mongodb'
 
@@ -83,6 +83,7 @@ export const getChatListController = async (
             timestamp: 1
           },
           user_info: {
+            _id: 1,
             name: 1,
             username: 1,
             avatar: 1
@@ -126,11 +127,11 @@ export const getChatDetailController = async (
         }
       },
       {
-        $limit: 5
+        $limit: 20
       },
       {
         $sort: {
-          timestamp: -1
+          timestamp: 1
         }
       }
     ])
@@ -139,6 +140,22 @@ export const getChatDetailController = async (
   res.json({ success: true, message: 'Lấy thông tin chat thành công', data })
 }
 
-export const sendMessageController = async (req: Request, res: Response, next: NextFunction) => {
-  res.json({ message: 'test chatting' })
+export const sendMessageController = async (req: Request, res: Response<SuccessWithoutData>, next: NextFunction) => {
+  try {
+    const message = req.body as MessageRequest
+    await (
+      await databaseService.getCollection(env.CONVERSATIONS_COLLECTION)
+    ).insertOne({
+      from: new ObjectId(message.from),
+      to: new ObjectId(message.to),
+      content: message.content,
+      timestamp: new Date()
+    })
+    res.json({
+      success: true,
+      message: 'Lưu tin nhắn thành công'
+    })
+  } catch (error) {
+    next(error)
+  }
 }

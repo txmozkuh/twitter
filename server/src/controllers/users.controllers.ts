@@ -22,6 +22,7 @@ import { ErrorCode, LoginFrom, TokenType, UserVerifyStatus } from '@/constants/e
 import mediaService from '@/services/medias.services'
 import { getPublicId } from '@/utils/file'
 import { env } from '@/config/env'
+import { sendVerifyEmail } from '@/utils/email'
 
 //flow : google oauth -> check user -> existed -> login -> tra ve token
 //                                  -> khong existed -> register -> tra ve token
@@ -78,7 +79,14 @@ export const registerController = async (
     const user = new User({ name, email, password, date_of_birth })
 
     const { email_verify_token } = await userService.register(user as RegisterRequest)
-    //TODO:Gửi email với email_verify_token nhận được ở trên
+
+    sendVerifyEmail(
+      email,
+      '[X] - Verify your email',
+      name,
+      `http://localhost:3000/users/verify-email?email_verify_token=${email_verify_token}`
+    )
+
     res.status(200).json({
       success: true,
       message: 'Đăng ký người dùng thành công. Vui lòng xác thực email trước khi bắt đầu',
@@ -137,9 +145,9 @@ export const refreshTokenController = async (
 }
 
 export const verifyTokenController = async (req: Request, res: Response<SuccessWithoutData>, next: NextFunction) => {
-  const { email_verify_token } = req.body
+  const { email_verify_token } = req.query
   try {
-    const decode_token = userService.verifyToken(email_verify_token) as TokenPayload
+    const decode_token = userService.verifyToken(email_verify_token as string) as TokenPayload
     const result = await (
       await databaseService.getCollection('users')
     ).findOneAndUpdate(
@@ -161,7 +169,7 @@ export const verifyTokenController = async (req: Request, res: Response<SuccessW
         'Token xác thực không tồn tại hoặc hết hạn',
         ErrorCode.TokenError
       )
-    res.status(HTTP_STATUS.OK).json({ success: true, message: 'Xác thực email thành công' })
+    res.redirect('http://localhost:4000/login')
   } catch (error) {
     next(error)
   }
