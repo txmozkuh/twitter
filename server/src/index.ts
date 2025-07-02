@@ -48,7 +48,6 @@ app.use(
 )
 
 app.use(passport.initialize())
-
 app.use('/users', userRouter)
 app.use('/tweets', tweetRouter)
 app.use('/medias', mediaRouter)
