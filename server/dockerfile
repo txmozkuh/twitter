@@ -2,9 +2,10 @@
 FROM node:20-slim
 
 # 2. Install ffmpeg
-RUN apt-get update && apt-get install -y ffmpeg && apt-get clean
-
-RUN corepack enable
+RUN apt-get update && apt-get install -y ffmpeg curl && \
+    corepack enable && \
+    corepack prepare yarn@stable --activate && \
+    yarn --version
 
 # 3. Set working directory
 WORKDIR /app
