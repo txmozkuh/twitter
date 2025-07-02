@@ -35,7 +35,7 @@ export default function Header({ className = '' }: HeaderProps) {
 
   return (
     <div
-      className={`sticky top-0 left-0 h-screen items-start justify-between py-6 md:p-4 ${className} flex flex-col overflow-hidden`}
+      className={`sticky top-0 left-0 h-screen items-start justify-between py-6 md:px-0 md:py-4 ${className} flex flex-col overflow-hidden`}
     >
       <div className='flex flex-col items-center space-y-12 md:block'>
         <img src={Logo} alt='logo' className='mx-5 size-6 md:size-7' />
@@ -43,10 +43,10 @@ export default function Header({ className = '' }: HeaderProps) {
           {headerItems.map((item) => (
             <Link
               to={item.url}
-              className={`${location.pathname === item.url ? 'bg-white/10 font-semibold' : ''} group flex items-end gap-4 rounded-full p-3 transition-all duration-100 hover:bg-white/10 md:px-5`}
+              className={`${location.pathname === item.url ? 'bg-white/10 font-semibold' : ''} group flex w-fit items-end gap-4 rounded-full p-3 transition-all duration-100 hover:bg-white/10 md:px-5`}
             >
               <item.icon className='size-7 stroke-2' />
-              <span className='hidden md:block'>{item.title}</span>
+              <span className='hidden text-lg md:block md:text-xl'>{item.title}</span>
             </Link>
           ))}
         </div>

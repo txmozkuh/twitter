@@ -1,8 +1,6 @@
 import ImagesLayout from '@/components/layouts/ImagesLayout'
 import CommentEditor from '@/components/ui/CommentEditor'
-import TweetEditor from '@/components/ui/TweetEditor'
-import { getTweetDetail } from '@/services/tweet'
-import { useQuery } from '@tanstack/react-query'
+
 import { ArrowLeft, Bookmark, Ellipsis, Heart, MessageCircle, Repeat2, Share } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 

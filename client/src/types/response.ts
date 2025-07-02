@@ -5,7 +5,7 @@ export interface RegisterResponse {
 }
 
 export interface LoginResponse {
-  user_id: string
+  _id: string
   name: string
   email: string
   date_of_birth: string
@@ -36,6 +36,7 @@ export interface UpdateProfileResponse {
 }
 
 export interface GetProfileResponse {
+  _id?: string
   name?: string
   email?: string
   date_of_birth?: string
@@ -47,6 +48,15 @@ export interface GetProfileResponse {
   cover_photo?: string
 }
 
-export interface GetTweetsResponse {}
-
-export interface GetTweetDetailResponse {}
+export interface ChatListResponse {
+  latestMessage: {
+    content: string
+    timestamp: string
+  }
+  user_info: {
+    _id: string
+    name: string
+    username: string
+    avatar: string
+  }
+}

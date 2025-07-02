@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { GetProfileResponse } from '@/types/response'
+import { GetProfileResponse, LoginResponse } from '@/types/response'
 interface User {
+  _id: string
   name: string
   email: string
   date_of_birth: string
@@ -15,6 +16,7 @@ interface User {
 }
 
 const initialState: User = {
+  _id: '',
   name: '',
   email: '',
   date_of_birth: new Date().toISOString(),
@@ -32,7 +34,7 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    create: (state, action: PayloadAction<User>) => {
+    create: (state, action: PayloadAction<LoginResponse>) => {
       return { ...action.payload }
     },
     update: (state, action: PayloadAction<GetProfileResponse>) => {
