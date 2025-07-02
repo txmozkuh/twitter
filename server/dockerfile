@@ -4,6 +4,8 @@ FROM node:20-slim
 # 2. Install ffmpeg
 RUN apt-get update && apt-get install -y ffmpeg && apt-get clean
 
+RUN corepack enable
+
 # 3. Set working directory
 WORKDIR /app
 
@@ -11,13 +13,13 @@ WORKDIR /app
 COPY package.json yarn.lock* ./
 
 # 5. Install dependencies (production only)
-RUN npm install --production --frozen-lockfile
+RUN yarn install --production --frozen-lockfile
 
 # 6. Copy all source code
 COPY . .
 
 # 7. Build TypeScript to JS
-RUN npm build
+RUN yarn build
 
 # 8. Expose port your app listens on
 EXPOSE 3000
