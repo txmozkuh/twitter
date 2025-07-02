@@ -27,7 +27,7 @@ jobs:
         env:
           ECR_REPO: ${{ secrets.ECR_REPO }}
         run: |
-          docker build -t twitter-server ./twitter/server
+          docker build -t twitter-server ./server
           docker tag twitter-server:latest $ECR_REPO:latest
           docker push $ECR_REPO:latest
 
