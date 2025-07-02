@@ -11,13 +11,13 @@ WORKDIR /app
 COPY package.json yarn.lock* ./
 
 # 5. Install dependencies (production only)
-RUN yarn install --production --frozen-lockfile
+RUN npm install --production --frozen-lockfile
 
 # 6. Copy all source code
 COPY . .
 
 # 7. Build TypeScript to JS
-RUN yarn build
+RUN npm build
 
 # 8. Expose port your app listens on
 EXPOSE 3000
