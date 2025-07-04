@@ -1,5 +1,6 @@
 import z from 'zod'
 import dotenv from 'dotenv'
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager'
 dotenv.config()
 
 const envSchema = z.object({

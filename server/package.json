@@ -31,6 +31,7 @@
     "typescript-eslint": "^8.26.1"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.840.0",
     "@aws-sdk/client-ses": "^3.835.0",
     "@react-email/components": "^0.1.1",
     "@react-email/render": "^1.1.3",
