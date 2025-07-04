@@ -27,22 +27,28 @@ jobs:
         env:
           ECR_REPO: ${{ secrets.ECR_REPO }}
         run: |
-          docker build -t twitter-server server
+          docker build -t twitter-server server 
           docker tag twitter-server:latest $ECR_REPO:latest
           docker push $ECR_REPO:latest
 
       - name: SSH into EC2 and pull new image
         run: |
+
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
           ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
+            echo "${{ secrets.ENV_FILE }}" > .env.production
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
               docker login --username AWS --password-stdin ${{ secrets.ECR_REPO }}
             docker pull ${{ secrets.ECR_REPO }}:latest
             docker stop twitter-server || true
             docker rm twitter-server || true
-            docker run -d --name twitter-server -p 3000:3000 ${{ secrets.ECR_REPO }}:latest
+            docker run -d --name twitter-server --env-file .env.production -p 3000:3000 ${{ secrets.ECR_REPO }}:latest
+            rm .env.production
+            docker image prune -f
+            echo "Cleanup done."
+
           EOF
