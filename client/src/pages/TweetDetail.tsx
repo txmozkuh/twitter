@@ -2,10 +2,10 @@ import ImagesLayout from '@/components/layouts/ImagesLayout'
 import CommentEditor from '@/components/ui/CommentEditor'
 
 import { ArrowLeft, Bookmark, Ellipsis, Heart, MessageCircle, Repeat2, Share } from 'lucide-react'
-import { useParams } from 'react-router-dom'
+// import { useParams } from 'react-router-dom'
 
 export default function TweetDetail() {
-  const { id } = useParams()
+  // const { id } = useParams()
   // const { data: postDetail } = useQuery({
   //   queryKey: ['post', 'detail'],
   //   queryFn: () => getTweetDetail(_id!)

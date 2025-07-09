@@ -15,7 +15,7 @@ class Http {
     this.axiosInstance.interceptors.request.use(
       function (request) {
         if (request.data instanceof FormData) {
-          delete request.headers['Content-Type'] // Let browser set boundary
+          delete request.headers['Content-Type']
         }
         const reduxStore = store.getState()
         const access_token = reduxStore.user.access_token
