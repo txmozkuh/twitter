@@ -15,6 +15,7 @@ export const API_URL = {
   },
   TWEET: {
     GET_TWEETS: '/tweets',
+    GET_NEWFEED: '/tweets/newfeed',
     GET_TWEET_DETAIL: '/tweets/detail'
   }
 } as const

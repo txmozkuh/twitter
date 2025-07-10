@@ -249,13 +249,46 @@ class TweetService {
       }
     ]
   }
-
+  private getTweetOwnerInfo(): PipelineStage[] {
+    return [
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user_id',
+          foreignField: '_id',
+          as: 'owner'
+        }
+      },
+      {
+        $unwind: {
+          path: '$owner',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          user: {
+            username: '$owner.username',
+            name: '$owner.name',
+            avatar: '$owner.avatar'
+          }
+        }
+      },
+      {
+        $unset: 'owner'
+      }
+    ]
+  }
   async getNewfeed(user_id: ObjectId) {
     const data = await (await databaseService.getCollection(env.FOLLOWERS_COLLECTION))
-      .aggregate([...this.getFollowerTweets(user_id), ...this.filterAudience(user_id), ...this.getParentTweet()])
+      .aggregate([
+        ...this.getFollowerTweets(user_id),
+        ...this.filterAudience(user_id),
+        ...this.getParentTweet(),
+        ...this.getTweetOwnerInfo()
+      ])
       .toArray()
     const result = deleteEmptyObject(data)
-
     this.increaseView(result) //update view in database
     result.forEach((item) => item.views++) //increase view in aggregation result to make it consistency
 
@@ -273,13 +306,13 @@ class TweetService {
         },
         ...this.countBookmark(tweet_id),
         ...this.countLike(tweet_id),
-        ...this.getParentTweet()
+        ...this.getParentTweet(),
+        ...this.getTweetOwnerInfo()
       ])
       .toArray()
     const comments = await (await databaseService.getCollection(env.TWEETS_COLLECTION))
       .aggregate<Tweet>([...this.getComments(tweet_id)])
       .toArray()
-    console.log(tweet)
     this.increaseView(comments)
     this.increaseView(tweet)
     return { tweet, comments }

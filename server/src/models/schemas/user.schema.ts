@@ -56,8 +56,11 @@ export default class User {
     this.bio = user.bio || ''
     this.location = user.location || ''
     this.website = user.website || ''
-    this.username = user.username || ''
-    this.avatar = user.avatar || ''
-    this.cover_photo = user.cover_photo || ''
+    this.username = user.username || user.name
+    this.avatar =
+      user.avatar ||
+      'https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o='
+    this.cover_photo =
+      user.cover_photo || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtv8ZjaRaQzJSOxxJFaMECVg7W4In9YbQ8yg&s'
   }
 }

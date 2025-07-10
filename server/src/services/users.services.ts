@@ -10,7 +10,6 @@ import { signToken } from '@/utils/jwt'
 import { TokenExpiredError, verify } from 'jsonwebtoken'
 import { ObjectId } from 'mongodb'
 import { env } from '@config/env'
-import { isEmpty } from 'lodash'
 import Follower from '@/models/schemas/follower.schema'
 class UserService {
   private signValidateToken(user_id: string, token_type: TokenType, expiresIn?: number) {

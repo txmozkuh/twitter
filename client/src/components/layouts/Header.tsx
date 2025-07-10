@@ -20,9 +20,7 @@ export default function Header({ className = '' }: HeaderProps) {
   const location = useLocation()
   const { data } = useQuery({
     queryKey: ['user', 'getProfile'],
-    queryFn: getProfile,
-    retry: false,
-    staleTime: 1000 * 60 * 15 // cache for 15 min,
+    queryFn: getProfile
   })
 
   useEffect(() => {

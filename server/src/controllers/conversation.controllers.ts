@@ -105,7 +105,6 @@ export const getChatDetailController = async (
   next: NextFunction
 ) => {
   const user_id = new ObjectId(req.user_id)
-
   const reciever_id = new ObjectId(req.params.user_id)
   const { max } = !req.query ? { max: 5 } : req.query
   const data = await (
@@ -127,15 +126,14 @@ export const getChatDetailController = async (
         }
       },
       {
-        $limit: 20
-      },
-      {
         $sort: {
-          timestamp: 1
+          timestamp: -1
         }
-      }
+      },
+      { $limit: 20 }
     ])
     .toArray()
+    .then((data) => data.reverse())
 
   res.json({ success: true, message: 'Lấy thông tin chat thành công', data })
 }

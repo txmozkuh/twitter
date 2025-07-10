@@ -1,6 +1,6 @@
 import z from 'zod'
 import dotenv from 'dotenv'
-import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager'
+import { error } from 'console'
 dotenv.config()
 
 const envSchema = z.object({
@@ -37,8 +37,7 @@ const envSchema = z.object({
 
 const parseEnv = envSchema.safeParse(process.env)
 if (!parseEnv.success) {
-  console.error('Invalid or missing enviroment variables: ', parseEnv.error.format())
-  process.exit(1)
+  throw error('Invalid or missing enviroment variables: ', parseEnv.error.format())
 }
 
 export const env = parseEnv.data

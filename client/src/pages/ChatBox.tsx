@@ -135,8 +135,8 @@ const ChatDetail = ({ from, to, socket }: ChatDetailProps) => {
   } = useQuery({
     queryKey: ['chatDetail', to],
     queryFn: () => getMessageDetail(to)
+    // 10 seconds
   })
-
   const { mutate, isPending: messIsPending } = useMutation({
     mutationFn: (message: MessageRequest) => sendMessage(message)
   })

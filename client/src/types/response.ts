@@ -60,3 +60,28 @@ export interface ChatListResponse {
     avatar: string
   }
 }
+
+export interface NewfeedResponse {
+  _id: string
+  user_id: string
+  type: 0 | 1
+  audience: 0
+  content: string
+  parent_id: string | null
+  hashtags: string[]
+  mentions: string[]
+  medias: string[]
+  views: number
+  created_at: string
+  updated_at: string
+  user: {
+    name: string
+    username: string
+    avatar: string
+  }
+}
+
+export interface TweetDetailResponse {
+  comment: unknown[]
+  tweet: (NewfeedResponse & { like_amount: string; bookmark_amount: string })[]
+}

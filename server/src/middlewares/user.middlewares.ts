@@ -153,7 +153,6 @@ export const logoutValidator = checkSchema({
               throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Không tìm thấy token') }
             }
             req.user_id = decode_token.user_id
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
           } catch (error) {
             throw { custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token không hợp lệ') }
           }

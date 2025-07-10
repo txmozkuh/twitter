@@ -35,7 +35,6 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     create: (state, action: PayloadAction<LoginResponse>) => {
-      console.log(state)
       return { ...action.payload }
     },
     update: (state, action: PayloadAction<GetProfileResponse>) => {

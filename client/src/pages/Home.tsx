@@ -1,12 +1,16 @@
 import Tweet from '@/components/ui/Tweet'
 import TweetEditor from '@/components/ui/TweetEditor'
+import { getNewfeed } from '@/services/tweet'
 import { RootState } from '@/stores/store'
-import { posts } from '@/utils/fakeData'
+import { useQuery } from '@tanstack/react-query'
 import { useSelector } from 'react-redux'
 
 export default function Home() {
   const user = useSelector((state: RootState) => state.user)
-
+  const { data: postData } = useQuery({
+    queryKey: ['tweet_homepage'],
+    queryFn: () => getNewfeed()
+  })
   return (
     <div className='w-full'>
       <div className='text-text-grey border-border-grey sticky top-0 left-0 z-100 flex w-full items-center border-b bg-black/95'>
@@ -25,15 +29,24 @@ export default function Home() {
         </div>
         <TweetEditor />
       </div>
-      {posts.map((post) => (
-        <Tweet
-          user_avatar={post.user_avatar}
-          name={post.name}
-          username={post.username}
-          content={post.content}
-          images={post.images}
-        />
-      ))}
+      {postData?.data.length === 0 ? (
+        <div className='text-text-grey border-border-grey w-full border-b py-4 text-center'>
+          Kết nối với mọi người để X của bạn thú vị hơn
+        </div>
+      ) : (
+        postData?.data.map((post, index) => (
+          <Tweet
+            id={post._id}
+            key={index}
+            user_avatar={post.user.avatar}
+            name={post.user.name}
+            username={post.user.username}
+            content={post.content}
+            views={post.views}
+            images={post.medias}
+          />
+        ))
+      )}
     </div>
   )
 }

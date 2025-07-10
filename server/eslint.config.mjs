@@ -14,7 +14,7 @@ export default [
       prettier: prettierPlugin
     },
     rules: {
-      'no-console': 'warn',
+      'no-console': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       ...prettierConfig.rules,
