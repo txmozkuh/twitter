@@ -8,17 +8,17 @@ const userSockets = new Map<string, string>()
 export const serverSocket = (httpServer: HTTPServer) => {
   const io = new Server(httpServer, {
     cors: {
-      origin: 'http://localhost:4000',
+      origin: env.CLIENT_URL,
       credentials: true,
       methods: ['GET', 'POST', 'PATCH', 'DELETE']
     }
   })
   io.on('connect', (socket: Socket) => {
-    console.log('Client connected:', socket.id)
+    // console.log('Client connected:', socket.id)
 
     socket.on('register', (userId: string) => {
       userSockets.set(userId, socket.id)
-      console.log(`User ${userId} registered with socket ${socket.id}`)
+      // console.log(`User ${userId} registered with socket ${socket.id}`)
     })
 
     socket.on('private message', async ({ from, to, content }) => {
@@ -44,7 +44,7 @@ export const serverSocket = (httpServer: HTTPServer) => {
           break
         }
       }
-      console.log(`Socket ${socket.id} disconnected`)
+      // console.log(`Socket ${socket.id} disconnected`)
     })
   })
 
