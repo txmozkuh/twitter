@@ -17,6 +17,13 @@ import { Router } from 'express'
 
 const tweetRouter = Router()
 
+/**
+ * @swagger
+ * tags:
+ *   name: Tweets
+ *   description: Tweets endpoints
+ */
+
 //Tạo tweet:
 tweetRouter.post('/create', accessTokenValidator, createTweetValidator, validateRequest, createTweetController)
 

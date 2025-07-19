@@ -17,6 +17,8 @@ import { serverSocket } from './config/socket'
 import http from 'http'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
+import swaggerUi from 'swagger-ui-express'
+import swaggerJsdoc from 'swagger-jsdoc'
 initFolder()
 
 databaseService
@@ -42,10 +44,37 @@ app.use(limiter)
 app.use(express.json())
 app.use(
   cors({
-    origin: 'http://localhost:4000', //allow testing client
+    origin: env.CLIENT_URL,
     credentials: true
   })
 )
+
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'My API',
+      version: '1.0.0',
+      description: 'Node + TypeScript + Swagger example'
+    },
+    tags: [
+      { name: 'Users', description: 'Auth-related endpoint' },
+      { name: 'Tweets', description: 'Tweet endpoint' },
+      { name: 'Likes', description: 'Like endpoint' },
+      { name: 'Bookmarks', description: 'Bookmark endpoint' },
+      { name: 'Messages', description: 'Message endpoint' },
+      { name: 'Medias', description: 'Images & Videos endpoint' }
+    ],
+    servers: [
+      {
+        url: env.CLIENT_URL
+      }
+    ]
+  },
+  apis: ['./src/routes/*.ts']
+}
+const swaggerSpec = swaggerJsdoc(swaggerOptions)
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 app.use(passport.initialize())
 app.use('/users', userRouter)

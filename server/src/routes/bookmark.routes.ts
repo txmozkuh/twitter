@@ -4,6 +4,13 @@ import { accessTokenValidator, validateRequest } from '@/middlewares/user.middle
 import { Router } from 'express'
 const bookmarkRouter = Router()
 
+/**
+ * @swagger
+ * tags:
+ *   name: Bookmarks
+ *   description: Bookmark tweets endpoint
+ */
+
 bookmarkRouter.post('/', accessTokenValidator, createBookmarkValidator, validateRequest, createBookmarkController)
 bookmarkRouter.delete(
   '/tweet/:tweet_id',

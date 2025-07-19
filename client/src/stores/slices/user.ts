@@ -34,7 +34,7 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    create: (state, action: PayloadAction<LoginResponse>) => {
+    create: (_state, action: PayloadAction<LoginResponse>) => {
       return { ...action.payload }
     },
     update: (state, action: PayloadAction<GetProfileResponse>) => {

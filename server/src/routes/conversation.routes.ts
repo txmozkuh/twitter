@@ -9,6 +9,13 @@ import { Router } from 'express'
 
 const conversationRouter = Router()
 
+/**
+ * @swagger
+ * tags:
+ *   name: Message
+ *   description: Message endpoints
+ */
+
 //Lấy danh sách chat với tin nhắn gần nhất
 conversationRouter.get('/message', accessTokenValidator, validateRequest, getChatListController)
 

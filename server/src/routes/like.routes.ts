@@ -7,6 +7,13 @@ import { accessTokenValidator, validateRequest } from '@/middlewares/user.middle
 import { Router } from 'express'
 const likeRouter = Router()
 
+/**
+ * @swagger
+ * tags:
+ *   name: Like
+ *   description: Tweet like endpoints
+ */
+
 likeRouter.post('/', accessTokenValidator, createLikeValidator, validateRequest, createLikeController)
 likeRouter.delete('/tweet/:tweet_id', accessTokenValidator, deleteLikeValidator, validateRequest, deleteLikeController)
 
