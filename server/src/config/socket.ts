@@ -8,8 +8,9 @@ const userSockets = new Map<string, string>()
 export const serverSocket = (httpServer: HTTPServer) => {
   const io = new Server(httpServer, {
     cors: {
-      origin: env.CLIENT_URL,
-      credentials: true,
+      // origin: env.CLIENT_URL,
+      origin: '*',
+      // credentials: true,
       methods: ['GET', 'POST', 'PATCH', 'DELETE']
     }
   })

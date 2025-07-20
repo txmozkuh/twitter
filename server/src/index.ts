@@ -42,12 +42,13 @@ const limiter = rateLimit({
 
 app.use(limiter)
 app.use(express.json())
-app.use(
-  cors({
-    origin: env.CLIENT_URL,
-    credentials: true
-  })
-)
+// app.use(
+//   cors({
+//     origin: env.CLIENT_URL,
+//     credentials: true
+//   })
+// )
+app.use(cors())
 
 const swaggerOptions = {
   definition: {

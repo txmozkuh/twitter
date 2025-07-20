@@ -42,7 +42,8 @@ class Http {
             if (error.response.status === 401) {
               if (error.response.data.error === ErrorCode.TokenError) {
                 if (error.config?.url === '/users/refresh-token') {
-                  console.log('Token lỗi!')
+                  toast.error('Token hết hạn')
+
                   store.dispatch(logout())
                   window.location.replace('/login')
                 }
@@ -52,7 +53,7 @@ class Http {
                 })
               }
             }
-            toast.error(error.response.data.message)
+            // toast.error(error.response.data.message)
             return Promise.reject(error.response.data)
           }
           //Network error:request send, but dont reach server
