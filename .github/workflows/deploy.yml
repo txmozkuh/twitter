@@ -47,6 +47,7 @@ jobs:
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
               docker login --username AWS --password-stdin ${{ secrets.ECR_REPO }}
             docker pull ${{ secrets.ECR_REPO }}:$TAG||{ echo "Failed to pull image"; exit 1; }
+            echo ${{secrets.ECR_REPO}}:$TAG
             docker stop twitter-server || true
             docker rm twitter-server || true
             docker run -d --name twitter-server --env-file .env -p 3000:3000 ${{ secrets.ECR_REPO }}:$TAG
