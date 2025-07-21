@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -25,10 +25,9 @@ jobs:
 
       - name: Build, tag, and push Docker image
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPO: ${{ secrets.ECR_REPO }}
         run: |
-          TAG=${{ github.sha }}
+         TAG=${{ github.sha }}
           docker build --no-cache -t twitter-server server 
           docker tag twitter-server:latest $ECR_REPO:$TAG
           docker tag twitter-server:latest $ECR_REPO:latest
@@ -43,72 +42,17 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # Set variables
-            TAG=${{ github.sha }}
-            ECR_REPO="${{ secrets.ECR_REPO }}"
-            AWS_REGION="${{ secrets.AWS_REGION }}"
-            
-            # Extract registry URL from full repo URI (everything before first slash)
-            ECR_REGISTRY=$(echo "$ECR_REPO" | cut -d'/' -f1)
-            
-            echo "Full repo URI: $ECR_REPO"
-            echo "Registry: $ECR_REGISTRY"
-            echo "Tag: $TAG"
-            echo "Expected image: $ECR_REPO:$TAG"
-            
-            # Create .env file
-            cat > .env << 'ENVEOF'
-          ${{ secrets.ENV_FILE }}
-          ENVEOF
-            
-            # Login to ECR (use registry, not full repo URI)
-            echo "Logging into ECR..."
-            aws ecr get-login-password --region "$AWS_REGION" | \
-              docker login --username AWS --password-stdin "$ECR_REGISTRY"
-            
-            # Verify AWS access
-            echo "Verifying AWS access..."
-            aws sts get-caller-identity
-            
-            # Check if repository exists and list available tags
-            echo "Checking repository contents..."
-            aws ecr list-images --repository-name personal/twitter-server --region "$AWS_REGION" || {
-              echo "Failed to list repository contents"
-              exit 1
-            }
-            
-            # Try pulling latest first (might exist from previous builds)
-            echo "Attempting to pull latest tag first..."
-            docker pull "$ECR_REPO:latest" || echo "Latest tag not found, continuing with specific tag..."
-            
-            # Pull new image
-            echo "Pulling image: $ECR_REPO:$TAG"
-            if ! docker pull "$ECR_REPO:$TAG"; then
-              echo "Failed to pull image: $ECR_REPO:$TAG"
-              echo "Available images in local Docker:"
-              docker images | grep "$ECR_REGISTRY" || echo "No ECR images found locally"
-              echo "Checking repository again:"
-              aws ecr list-images --repository-name personal/twitter-server --region "$AWS_REGION"
-              exit 1
-            fi
-            
-            # Stop and remove old container
-            echo "Stopping old container..."
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
+            echo "${{ secrets.ENV_FILE }}" > .env
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
+              docker login --username AWS --password-stdin ${{ secrets.ECR_REPO }}
+            echo ${{secrets.ECR_REPO}}:$TAG
+            docker pull ${{ secrets.ECR_REPO }}:$TAG||{ echo "Failed to pull image"; exit 1; }
             docker stop twitter-server || true
             docker rm twitter-server || true
-            
-            # Run new container
-            echo "Starting new container..."
-            docker run -d \
-              --name twitter-server \
-              --env-file .env \
-              --restart unless-stopped \
-              -p 3000:3000 \
-              "$ECR_REPO:$TAG"
-            
-            # Cleanup
+            docker run -d --name twitter-server --env-file .env -p 3000:3000 ${{ secrets.ECR_REPO }}:$TAG
             rm .env
             docker image prune -f
-            echo "Deployment completed successfully!"
+            echo "Cleanup done."
+
           EOF
