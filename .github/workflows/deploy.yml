@@ -52,7 +52,7 @@ jobs:
             docker rm twitter-server || true
             docker run -d --name twitter-server --env-file .env -p 3000:3000 ${{ secrets.ECR_REPO }}:$TAG
             rm .env
-            docker image prune -f
+            docker image prune -f -a
             echo "Cleanup done."
 
           EOF
