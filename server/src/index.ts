@@ -31,7 +31,6 @@ databaseService
 const app = express()
 const PORT = env.PORT || 3000
 
-app.use(cors())
 app.use(helmet())
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -42,13 +41,13 @@ const limiter = rateLimit({
 
 app.use(limiter)
 app.use(express.json())
-// app.use(
-//   cors({
-//     origin: env.CLIENT_URL,
-//     credentials: true
-//   })
-// )
-app.use(cors())
+app.use(
+  cors({
+    origin: env.CLIENT_URL,
+    credentials: true
+  })
+)
+// app.use(cors())
 
 const swaggerOptions = {
   definition: {
@@ -76,7 +75,6 @@ const swaggerOptions = {
         }
       }
     },
-
     security: [
       {
         bearerAuth: []

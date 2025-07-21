@@ -25,7 +25,7 @@ export default function ChatBox() {
 
   const socketRef = useRef<Socket>(null)
   useEffect(() => {
-    const socket = io('http://localhost:3000', { withCredentials: true })
+    const socket = io('https://api.daeva.tech', { withCredentials: true })
 
     socket.on('connect', () => {})
     socket.emit('register', user._id)
