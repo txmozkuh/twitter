@@ -47,6 +47,7 @@ app.use(
     credentials: true
   })
 )
+console.log('Showing connection to: ', env.CLIENT_URL)
 // app.use(cors())
 
 const swaggerOptions = {
