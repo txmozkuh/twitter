@@ -58,6 +58,7 @@ const swaggerOptions = {
       version: '1.0.0',
       description: 'Node + TypeScript + Swagger example'
     },
+
     tags: [
       { name: 'Users', description: 'Auth-related endpoint' },
       { name: 'Tweets', description: 'Tweet endpoint' },
@@ -66,16 +67,37 @@ const swaggerOptions = {
       { name: 'Messages', description: 'Message endpoint' },
       { name: 'Medias', description: 'Images & Videos endpoint' }
     ],
-    servers: [
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      }
+    },
+
+    security: [
       {
-        url: env.CLIENT_URL
+        bearerAuth: []
       }
     ]
   },
+
   apis: ['./src/routes/*.ts']
 }
 const swaggerSpec = swaggerJsdoc(swaggerOptions)
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+app.use(
+  '/docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customCss: `
+      .curl-command, .request-url, .request-headers {
+        display: none !important;
+      }
+    `
+  })
+)
 
 app.use(passport.initialize())
 app.use('/users', userRouter)
