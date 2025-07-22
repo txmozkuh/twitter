@@ -17,7 +17,7 @@ import { serverSocket } from './config/socket'
 import http from 'http'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
-import swaggerUi from 'swagger-ui-express'
+import swaggerUi, { SwaggerOptions } from 'swagger-ui-express'
 import swaggerJsdoc from 'swagger-jsdoc'
 initFolder()
 
@@ -58,7 +58,11 @@ const swaggerOptions = {
       version: '1.0.0',
       description: 'Node + TypeScript + Swagger example'
     },
-
+    // servers: [
+    //   {
+    //     url: 'https://api.daeva.tech'
+    //   }
+    // ],
     tags: [
       { name: 'Users', description: 'Auth-related endpoint' },
       { name: 'Tweets', description: 'Tweet endpoint' },
@@ -75,12 +79,7 @@ const swaggerOptions = {
           bearerFormat: 'JWT'
         }
       }
-    },
-    security: [
-      {
-        bearerAuth: []
-      }
-    ]
+    }
   },
 
   apis: ['./src/routes/*.ts']
@@ -89,6 +88,7 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions)
 app.use(
   '/docs',
   swaggerUi.serve,
+
   swaggerUi.setup(swaggerSpec, {
     customCss: `
       .curl-command, .request-url, .request-headers {

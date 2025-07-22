@@ -52,7 +52,7 @@ userRouter.get('/google/callback', passport.authenticate('google', { session: fa
  * @swagger
  * /users/login:
  *   post:
- *     summary: Login
+ *     summary: Login in app
  *     tags: [Users]
  *     requestBody:
  *       required: true
@@ -72,58 +72,9 @@ userRouter.get('/google/callback', passport.authenticate('google', { session: fa
  *                 example: Example123.
  *     responses:
  *       200:
- *         description: Successful login
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Đăng nhập thành công
- *                 data:
- *                   type: object
- *                   properties:
- *                     name:
- *                       type: string
- *                       example: Gia Mỹ
- *                     email:
- *                       type: string
- *                       format: email
- *                       example: giamy@gmail.com
- *                     date_of_birth:
- *                       type: string
- *                       format: date-time
- *                       example: "2000-12-18T00:00:00.000Z"
- *                     bio:
- *                       type: string
- *                       example: ""
- *                     location:
- *                       type: string
- *                       example: Vietnam
- *                     website:
- *                       type: string
- *                       example: ""
- *                     username:
- *                       type: string
- *                       example: giamyne
- *                     avatar:
- *                       type: string
- *                       format: uri
- *                       example: https://res.cloudinary.com/.../avatar.avif
- *                     cover_photo:
- *                       type: string
- *                       format: uri
- *                       example: https://res.cloudinary.com/.../cover.avif
- *                     access_token:
- *                       type: string
- *                       example: Bearer ey...
- *                     refresh_token:
- *                       type: string
- *                       example: Bearer ey...
+ *         description: Successfully login
+ *       400:
+ *         description: Incorrect login parameters
  */
 userRouter.post('/login', loginValidator, validateRequest, loginController)
 /**
@@ -140,27 +91,32 @@ userRouter.post('/login', loginValidator, validateRequest, loginController)
  *             type: object
  *             required:
  *               - email
+ *               - name
  *               - password
+ *               - confirm_password
+ *               - date_of_birth
  *             properties:
  *               email:
  *                 type: string
- *                 example: us
- *               password:
+ *                 example: example@gmail.com
+ *               name :
  *                 type: string
+ *                 example: exampleee
+ *               password :
+ *                 type: string
+ *                 example: Example123.
+ *               confirm_password :
+ *                 type: string
+ *                 example: Example123.
+ *               date_of_birth :
+ *                 type : string
+ *                 example: 2025-03-20T03:11:52.126Z
  *     responses:
  *       200:
- *         description: register
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: number
- *                   name:
- *                     type: string
+ *         description: Successfully register
+ *       400:
+ *         description: Incorrect register parameters
+ *
  */
 userRouter.post('/register', registerValidator, validateRequest, registerController)
 
@@ -177,29 +133,31 @@ userRouter.post('/register', registerValidator, validateRequest, registerControl
  *           schema:
  *             type: object
  *             required:
+ *               - name
  *               - email
  *               - password
+ *               - confirm_password
+ *               - date_of_birth
  *             properties:
  *               email:
  *                 type: string
  *               password:
  *                 type: string
+ *               confirm_password:
+ *                 type: string
+ *               date_of_birth:
+ *                 type: string
  *     responses:
  *       200:
- *         description: logout
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: number
- *                   name:
- *                     type: string
+ *         description: Successfully logout
+ *       400:
+ *         description: Failed to logout (expired token)
+ *     security:
+ *        - bearerAuth: []
+ *
  */
 userRouter.post('/logout', logoutValidator, validateRequest, logoutController)
+
 userRouter.post('/refresh-token', refreshTokenValidator, validateRequest, refreshTokenController)
 userRouter.get('/verify-email', verifyTokenValidator, validateRequest, verifyTokenController)
 userRouter.post('/forgot-password', forgotPasswordValidator, validateRequest, forgotPasswordController)
