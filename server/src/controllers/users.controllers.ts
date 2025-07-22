@@ -169,7 +169,7 @@ export const verifyTokenController = async (req: Request, res: Response<SuccessW
         'Token xác thực không tồn tại hoặc hết hạn',
         ErrorCode.TokenError
       )
-    res.redirect('http://localhost:4000/login')
+    res.redirect(env.CLIENT_URL)
   } catch (error) {
     next(error)
   }
