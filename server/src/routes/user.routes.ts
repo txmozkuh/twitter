@@ -22,6 +22,7 @@ import {
   registerValidator,
   refreshTokenValidator,
   verifyTokenValidator,
+  forgotPasswordTokenValidator,
   validateRequest,
   forgotPasswordValidator,
   resetPasswordValidator,
@@ -231,6 +232,8 @@ userRouter.get('/verify-email', verifyTokenValidator, validateRequest, verifyTok
  *
  */
 userRouter.post('/forgot-password', forgotPasswordValidator, validateRequest, forgotPasswordController)
+
+// userRouter.get('/forgot-password', forgotPasswordETokenValidator, validateRequest, verifyTokenController)
 
 /**
  * @swagger

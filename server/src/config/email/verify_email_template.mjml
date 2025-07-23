@@ -1,0 +1,39 @@
+<mjml>
+  <mj-body>
+    <mj-raw> </mj-raw>
+    <mj-section background-color="#f0f0f0">
+      <mj-column>
+        <mj-text font-style="italic" font-size="20px" color="#626262">Verify your email!</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-raw> </mj-raw>
+    <mj-section background-color="black" background-size="cover" background-repeat="no-repeat">
+      <mj-column width="600px">
+        <mj-image
+          src="https://img.freepik.com/free-vector/new-2023-twitter-logo-x-icon-design_1017-45418.jpg?semt=ais_hybrid&w=740"
+          width="100px"
+        ></mj-image>
+      </mj-column>
+    </mj-section>
+    <mj-raw>
+      <!-- Intro text -->
+    </mj-raw>
+    <mj-section background-color="#fafafa">
+      <mj-column width="400px">
+        <mj-text font-style="italic" font-size="20px" font-family="Helvetica Neue" color="#626262"
+          >Hello {{name}}</mj-text
+        >
+        <mj-text color="#525252">Last step to join X! Clicked Verified finishing your profile</mj-text>
+        <mj-text color="#525252">This email expired within 24 hours! </mj-text>
+        <mj-text color="#525252">Thank you! </mj-text>
+        <mj-button background-color="#F45E43" href="{{link}}">Learn more</mj-button>
+      </mj-column>
+    </mj-section>
+    <mj-raw>
+      <!-- Side image -->
+    </mj-raw>
+    <mj-section background-color="black">
+      <mj-column width="300px"> </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

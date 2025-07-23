@@ -22,7 +22,7 @@ import { ErrorCode, LoginFrom, TokenType, UserVerifyStatus } from '@/constants/e
 import mediaService from '@/services/medias.services'
 import { getPublicId } from '@/utils/file'
 import { env } from '@/config/env'
-import { sendVerifyEmail } from '@/utils/email'
+import { sendReclaimPasswordEmail, sendVerifyEmail } from '@/utils/email'
 
 //flow : google oauth -> check user -> existed -> login -> tra ve token
 //                                  -> khong existed -> register -> tra ve token
@@ -178,8 +178,10 @@ export const forgotPasswordController = async (req: Request, res: Response<Succe
   const { email } = req.body
   try {
     const db = await databaseService.getCollection('users')
-    const user = await db.findOne({ email })
-    const forgot_password_token = await userService.createForgotPasswordToken(user!._id.toString())
+    const user = await db.findOne<User>({ email })
+    const forgot_password_token = await userService.createForgotPasswordToken(user!._id!.toString())
+    const reclaim_url = `https://api.daeva.tech/users/forgot-password?forgot-password-token=${forgot_password_token}`
+    await sendReclaimPasswordEmail(email, user!.name!, reclaim_url)
     db.updateOne(
       { email },
       {

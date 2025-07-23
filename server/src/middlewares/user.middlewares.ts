@@ -213,6 +213,24 @@ export const verifyTokenValidator = checkSchema({
   }
 })
 
+export const forgotPasswordTokenValidator = checkSchema({
+  email_verify_token: {
+    in: 'query',
+    isString: { errorMessage: 'Token phải là chuỗi' },
+    custom: {
+      options: (value) => {
+        const token = userService.verifyToken(value) as TokenPayload
+        if (token.token_type !== TokenType.EmailVerifyToken) {
+          throw {
+            custom_error: new WrappedError(HTTP_STATUS.UNAUTHORIZED, 'Token xác thực tài khoản không hợp lệ')
+          }
+        }
+        return true
+      }
+    }
+  }
+})
+
 export const forgotPasswordValidator = checkSchema({
   email: {
     in: ['body'],
