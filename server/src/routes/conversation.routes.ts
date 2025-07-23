@@ -12,14 +12,36 @@ const conversationRouter = Router()
 /**
  * @swagger
  * tags:
- *   name: Message
+ *   name: Conversation
  *   description: Message endpoints
  */
 
 //Lấy danh sách chat với tin nhắn gần nhất
+
 conversationRouter.get('/message', accessTokenValidator, validateRequest, getChatListController)
 
 //Lấy danh sách chat của 2 người
+/**
+ * @swagger
+ * /conversations/message/detail/{user_id}:
+ *   get:
+ *     summary: Get conversation history
+ *     tags: [Conversation]
+ *     security:
+ *       - bearerAuth : []
+ *     parameters:
+ *       - name: user_id
+ *         in : path
+ *         required: true
+ *         schema:
+ *          type: string
+ *     responses:
+ *       200:
+ *         description: OK, sent email for password reclaim
+ *       401:
+ *         description: Fail to request reclaim password
+ *
+ */
 conversationRouter.get(
   '/message/detail/:user_id',
   accessTokenValidator,
