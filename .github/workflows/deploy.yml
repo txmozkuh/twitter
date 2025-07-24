@@ -37,6 +37,7 @@ jobs:
 
       - name: SSH into EC2 and pull new image
         run: |
+          echo "------ACCESS TO EC2------"
           TAG=${{ github.sha }}
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
@@ -47,13 +48,19 @@ jobs:
             echo "${{ secrets.ENV_FILE }}" > .env
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
               docker login --username AWS --password-stdin ${{ secrets.ECR_REPO }}
+            
+            echo "------PULLING NEW IMAGE------"
             echo ${{secrets.ECR_REPO}}:$TAG
             docker pull ${{ secrets.ECR_REPO }}:$TAG
+
+            echo "------RUNNING CONTAINER------"
             docker stop twitter-server || true
             docker rm twitter-server || true
             docker run -d --name twitter-server --env-file .env -p 3000:3000 ${{ secrets.ECR_REPO }}:$TAG
+
+            echo "------CLEANING SPACE------"
             docker image prune -a --force
             rm .env
-            echo "Cleanup done."
+            echo "------DONE------"
 
           EOF
