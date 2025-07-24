@@ -49,17 +49,18 @@ jobs:
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
               docker login --username AWS --password-stdin ${{ secrets.ECR_REPO }}
             
+            echo "------STOP RUNNING CONTAINER, CLEANUP------"
+            docker stop twitter-server || true
+            docker rm twitter-server || true
+            docker image prune -a --force
             echo "------PULLING NEW IMAGE------"
             echo ${{secrets.ECR_REPO}}:$TAG
             docker pull ${{ secrets.ECR_REPO }}:$TAG
 
             echo "------RUNNING CONTAINER------"
-            docker stop twitter-server || true
-            docker rm twitter-server || true
+            
             docker run -d --name twitter-server --env-file .env -p 3000:3000 ${{ secrets.ECR_REPO }}:$TAG
-
-            echo "------CLEANING SPACE------"
-            docker image prune -a --force
+            
             rm .env
             echo "------DONE------"
 
