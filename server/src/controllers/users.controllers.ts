@@ -174,13 +174,39 @@ export const verifyTokenController = async (req: Request, res: Response<SuccessW
     next(error)
   }
 }
+
+export const forgotPasswordTokenController = async (
+  req: Request,
+  res: Response<SuccessWithoutData>,
+  next: NextFunction
+) => {
+  const { forgot_password_token } = req.query
+  try {
+    const decode_token = userService.verifyToken(forgot_password_token as string) as TokenPayload
+    const result = await (
+      await databaseService.getCollection('users')
+    ).findOne({
+      _id: new ObjectId(decode_token.user_id),
+      forgot_password_token
+    })
+    if (!result)
+      throw new WrappedError(
+        HTTP_STATUS.UNAUTHORIZED,
+        'Token xác thực không tồn tại hoặc hết hạn',
+        ErrorCode.TokenError
+      )
+    res.redirect('Redirect trang reset password: ' + forgot_password_token)
+  } catch (error) {
+    next(error)
+  }
+}
 export const forgotPasswordController = async (req: Request, res: Response<SuccessWithoutData>, next: NextFunction) => {
   const { email } = req.body
   try {
     const db = await databaseService.getCollection('users')
     const user = await db.findOne<User>({ email })
     const forgot_password_token = await userService.createForgotPasswordToken(user!._id!.toString())
-    const reclaim_url = `https://api.daeva.tech/users/forgot-password?forgot-password-token=${forgot_password_token}`
+    const reclaim_url = `https://clientUrl/forgot-password?forgot-password-token=${forgot_password_token}`
     await sendReclaimPasswordEmail(email, user!.name!, reclaim_url)
     db.updateOne(
       { email },
@@ -193,7 +219,7 @@ export const forgotPasswordController = async (req: Request, res: Response<Succe
     )
     res
       .status(HTTP_STATUS.OK)
-      .json({ success: true, message: 'Gửi yêu cầu reset mật khẩu thành công!\n Kiểm tra email của bạn' })
+      .json({ success: true, message: 'Gửi yêu cầu reset mật khẩu thành công! Kiểm tra email của bạn' })
   } catch (error) {
     next(error)
   }

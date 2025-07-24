@@ -14,7 +14,8 @@ import {
   deleteCoverPhotoController,
   followUserController,
   unFollowUserController,
-  googleAuthController
+  googleAuthController,
+  forgotPasswordTokenController
 } from '@/controllers/users.controllers'
 import {
   loginValidator,
@@ -207,6 +208,10 @@ userRouter.post('/refresh-token', refreshTokenValidator, validateRequest, refres
  */
 userRouter.get('/verify-email', verifyTokenValidator, validateRequest, verifyTokenController)
 
+//Reset password flow : send request reset with email => send email reset with link including token => click link return to ui with token
+// => change password with token, old pass, new pass, confirm new pass
+
+//Gửi email kèm link
 /**
  * @swagger
  * /users/forgot-password:
@@ -233,7 +238,8 @@ userRouter.get('/verify-email', verifyTokenValidator, validateRequest, verifyTok
  */
 userRouter.post('/forgot-password', forgotPasswordValidator, validateRequest, forgotPasswordController)
 
-// userRouter.get('/forgot-password', forgotPasswordETokenValidator, validateRequest, verifyTokenController)
+//
+userRouter.get('/forgot-password', forgotPasswordTokenValidator, validateRequest, forgotPasswordTokenController)
 
 /**
  * @swagger
