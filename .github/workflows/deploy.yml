@@ -49,6 +49,7 @@ jobs:
               docker login --username AWS --password-stdin ${{ secrets.ECR_REPO }}
             echo ${{secrets.ECR_REPO}}:$TAG
             docker system prune -a --volumes --force
+            docker image prune -a --force
             docker pull ${{ secrets.ECR_REPO }}:$TAG
             docker stop twitter-server || true
             docker rm twitter-server || true
