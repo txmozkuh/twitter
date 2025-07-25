@@ -68,7 +68,7 @@ const swaggerOptions = {
       { name: 'Tweets', description: 'Tweet endpoint' },
       { name: 'Likes', description: 'Like endpoint' },
       { name: 'Bookmarks', description: 'Bookmark endpoint' },
-      { name: 'Messages', description: 'Message endpoint' },
+      { name: 'Conversations', description: 'Message endpoint' },
       { name: 'Medias', description: 'Images & Videos endpoint' }
     ],
     components: {

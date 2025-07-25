@@ -17,91 +17,69 @@ import { Router } from 'express'
 
 const tweetRouter = Router()
 
-/**
- * @swagger
- * tags:
- *   name: Tweets
- *   description: Tweets endpoints
- */
-
 //Tạo tweet:
 /**
  * @swagger
- * /tweets/create:
- *   post:
- *     summary: Create tweet
- *     tags: [Tweets]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 example: example@gmail.com
- *               password:
- *                 type: string
- *                 example: Example123.
- *     responses:
- *       200:
- *         description: Successful login
+ *   /tweets/create:
+ *     post:
+ *       summary: Create a tweet
+ *       description: Allows an authenticated user to create a tweet, retweet, comment, or quote tweet.
+ *       tags:
+ *         - Tweets
+ *       security:
+ *         - bearerAuth: []
+ *       requestBody:
+ *         required: true
  *         content:
  *           application/json:
  *             schema:
  *               type: object
+ *               required:
+ *                 - type
+ *                 - audience
+ *                 - content
+ *                 - parent_id
+ *                 - hashtags
+ *                 - mentions
+ *                 - medias
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
+ *                 type:
  *                   type: string
- *                   example: Đăng nhập thành công
- *                 data:
- *                   type: object
- *                   properties:
- *                     name:
- *                       type: string
- *                       example: Gia Mỹ
- *                     email:
- *                       type: string
- *                       format: email
- *                       example: giamy@gmail.com
- *                     date_of_birth:
- *                       type: string
- *                       format: date-time
- *                       example: "2000-12-18T00:00:00.000Z"
- *                     bio:
- *                       type: string
- *                       example: ""
- *                     location:
- *                       type: string
- *                       example: Vietnam
- *                     website:
- *                       type: string
- *                       example: ""
- *                     username:
- *                       type: string
- *                       example: giamyne
- *                     avatar:
- *                       type: string
- *                       format: uri
- *                       example: https://res.cloudinary.com/.../avatar.avif
- *                     cover_photo:
- *                       type: string
- *                       format: uri
- *                       example: https://res.cloudinary.com/.../cover.avif
- *                     access_token:
- *                       type: string
- *                       example: Bearer ey...
- *                     refresh_token:
- *                       type: string
- *                       example: Bearer ey...
+ *                   enum: [Tweet, Retweet, comment, quote tweet]
+ *                   description: Type of tweet
+ *                 audience:
+ *                   type: string
+ *                   enum: [EveryOne, TweetCircle]
+ *                   description: Target audience for the tweet
+ *                 content:
+ *                   type: string
+ *                   description: Content of the tweet
+ *                 parent_id:
+ *                   type: string
+ *                   nullable: true
+ *                   description: Parent tweet ID if this is a comment, retweet, or quote
+ *                 hashtags:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: List of hashtags
+ *                 mentions:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: List of mentioned usernames
+ *                 medias:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: List of media IDs
+ *       responses:
+ *         '200':
+ *           description: Successfully create a tweet
+ *         '400':
+ *           description: Failed to request
  */
+
 tweetRouter.post('/create', accessTokenValidator, createTweetValidator, validateRequest, createTweetController)
 
 // tweetRouter.get(
@@ -115,7 +93,7 @@ tweetRouter.post('/create', accessTokenValidator, createTweetValidator, validate
 
 //Lấy danh sách tweet
 
-tweetRouter.get('/', accessTokenValidator, validateRequest, getTweetListController)
+// tweetRouter.get('/', accessTokenValidator, validateRequest, getTweetListController)
 
 //Param: {number, page,tweet_type}
 tweetRouter.get(
@@ -137,60 +115,33 @@ tweetRouter.get(
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Successful get tweet list
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Đăng nhập thành công
- *                 data:
- *                   type: object
- *                   properties:
- *                     name:
- *                       type: string
- *                       example: Gia Mỹ
- *                     email:
- *                       type: string
- *                       format: email
- *                       example: giamy@gmail.com
- *                     date_of_birth:
- *                       type: string
- *                       format: date-time
- *                       example: "2000-12-18T00:00:00.000Z"
- *                     bio:
- *                       type: string
- *                       example: ""
- *                     location:
- *                       type: string
- *                       example: Vietnam
- *                     website:
- *                       type: string
- *                       example: ""
- *                     username:
- *                       type: string
- *                       example: giamyne
- *                     avatar:
- *                       type: string
- *                       format: uri
- *                       example: https://res.cloudinary.com/.../avatar.avif
- *                     cover_photo:
- *                       type: string
- *                       format: uri
- *                       example: https://res.cloudinary.com/.../cover.avif
- *                     access_token:
- *                       type: string
- *                       example: Bearer ey...
- *                     refresh_token:
- *                       type: string
- *                       example: Bearer ey...
+ *         description: Successful get newfeed
  */
 tweetRouter.get('/newfeed', accessTokenValidator, validateRequest, getNewfeedController)
+
+/**
+ * @swagger
+ *   /tweets/detail/{tweet_id}:
+ *     get:
+ *       summary: Request for tweet detail, including comments
+ *       description: Retrieve tweet details with associated comments by tweet ID.
+ *       tags:
+ *         - Tweets
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - name: tweet_id
+ *           in: path
+ *           required: true
+ *           schema:
+ *             type: string
+ *           description: ID of the tweet to retrieve
+ *       responses:
+ *         '200':
+ *           description: Successfully get tweet detail
+ *         '400':
+ *           description: Failed to request
+ */
 
 tweetRouter.get(
   '/detail/:tweet_id',
