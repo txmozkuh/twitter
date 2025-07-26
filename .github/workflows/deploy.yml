@@ -27,8 +27,8 @@ jobs:
       - name: Build, tag, and push Docker image
         env:
           ECR_REPO: ${{ secrets.ECR_REPO }}
+          TAG: ${{ github.sha }}
         run: |
-         TAG=${{ github.sha }}
           docker build --no-cache -t twitter-server server 
           docker tag twitter-server:latest $ECR_REPO:$TAG
           docker tag twitter-server:latest $ECR_REPO:latest
@@ -38,7 +38,6 @@ jobs:
       - name: SSH into EC2 and pull new image
         run: |
           echo "------ACCESS TO EC2------"
-          TAG=${{ github.sha }}
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
@@ -47,19 +46,19 @@ jobs:
           ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
             echo "${{ secrets.ENV_FILE }}" > .env
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
-              docker login --username AWS --password-stdin ${{ secrets.ECR_REPO }}
+              docker login --username AWS --password-stdin $ECR_REPO
             
             echo "------STOP RUNNING CONTAINER, CLEANUP------"
             docker stop twitter-server || true
             docker rm twitter-server || true
             docker image prune -a --force
             echo "------PULLING NEW IMAGE------"
-            echo ${{secrets.ECR_REPO}}:$TAG
-            docker pull ${{ secrets.ECR_REPO }}:$TAG
+            echo $ECR_REPO:$TAG
+            docker pull $ECR_REPO:$TAG
 
             echo "------RUNNING CONTAINER------"
             
-            docker run -d --restart=always --name twitter-server --env-file .env -p 3000:3000 ${{ secrets.ECR_REPO }}:$TAG
+            docker run -d --restart=always --name twitter-server --env-file .env -p 3000:3000 $ECR_REPO:$TAG
             
             rm .env
             echo "------DONE------"
