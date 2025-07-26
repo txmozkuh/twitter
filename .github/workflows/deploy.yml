@@ -59,7 +59,7 @@ jobs:
 
             echo "------RUNNING CONTAINER------"
             
-            docker run -d --name twitter-server --env-file .env -p 3000:3000 ${{ secrets.ECR_REPO }}:$TAG
+            docker run -d --restart=always --name twitter-server --env-file .env -p 3000:3000 ${{ secrets.ECR_REPO }}:$TAG
             
             rm .env
             echo "------DONE------"
