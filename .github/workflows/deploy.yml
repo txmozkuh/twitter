@@ -36,6 +36,9 @@ jobs:
           docker push $ECR_REPO:latest
 
       - name: SSH into EC2 and pull new image
+        env:
+          ECR_REPO: ${{ secrets.ECR_REPO }}
+          TAG: ${{ github.sha }}
         run: |
           echo "------ACCESS TO EC2------"
           mkdir -p ~/.ssh
